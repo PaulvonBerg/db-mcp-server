@@ -35,8 +35,8 @@ The server is ready for local and cloud deployment. A running MCP server is avai
 2. **Configure environment:**
    ```bash
    cp .env.example .env
-   # Edit .env with your DB API credentials
    ```
+   Next, edit the new `.env` file with your DB API credentials. See the "Configuration" section for details on each variable.
 
 3. **Run the server:**
    ```bash
@@ -314,17 +314,8 @@ For production use with a custom domain and enhanced security:
      --set-env-vars CUSTOM_DOMAIN=your-domain.com
    ```
 
-#### Environment Variables
-
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `CUSTOM_DOMAIN` | Optional | Your custom domain (enables enhanced security) | `mcp.example.com` |
-| `CLOUD_RUN_URL` | Auto-detected | Cloud Run backend URL (auto-detected, override if needed) | `https://service-123.region.run.app` |
-| `GCP_PROJECT_ID` | Auto-detected | Google Cloud project ID (auto-detected from metadata) | `my-project-123` |
-
-**Note**: The `CLOUD_RUN_URL` is automatically detected from the Cloud Run environment. You only need to set `CUSTOM_DOMAIN` if using a custom domain with load balancer.
-
 ### Docker (Local Development)
+
 
 ```bash
 # Build the image
@@ -462,19 +453,25 @@ https://github.com/PaulvonBerg/db-mcp-server
 
 Thank you!
 
-## 📝 API Reference
+## ⚙️ Configuration
+
+The server is configured via environment variables. For local development, create a `.env` file in the root directory by copying the `.env.example` template. For cloud deployment, these values are set via Google Secret Manager or directly on the service.
+
+See the `.env.example` file for comments on which credential goes where to avoid confusion.
 
 ### Environment Variables
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `DB_API_KEY` | Deutsche Bahn API client ID | Yes | - |
-| `DB_API_SECRET` | Deutsche Bahn API secret key | Yes | - |
-| `GCP_PROJECT_ID` | Google Cloud project ID | Auto-detected | - |
-| `CUSTOM_DOMAIN` | Custom domain for enhanced security | Optional | - |
-| `CLOUD_RUN_URL` | Cloud Run backend URL | Auto-detected | - |
-| `LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR) | Optional | INFO |
-| `PORT` | Server port | Optional | 8080 |
+| Variable         | Description                                         | Source / Notes                                                              |
+|------------------|-----------------------------------------------------|-----------------------------------------------------------------------------|
+| `DB_API_KEY`     | Your Deutsche Bahn API **Client ID**                | **Required**. Set in `.env` (local) or `DB_API_KEY` secret (cloud).           |
+| `DB_API_SECRET`  | Your Deutsche Bahn API **Key (the secret)**         | **Required**. Set in `.env` (local) or `DB_API_SECRET` secret (cloud).        |
+| `GCP_PROJECT_ID` | Your Google Cloud project ID                        | Required for cloud deployment. Auto-detected if not set.                    |
+| `CUSTOM_DOMAIN`  | Your custom domain for the deployed service         | Optional. Enables enhanced security for cloud deployment.                   |
+| `CLOUD_RUN_URL`  | The backend URL of the Cloud Run service            | Optional. Auto-detected in Cloud Run, only override if needed.              |
+| `LOG_LEVEL`      | Logging level (DEBUG, INFO, WARNING, ERROR)         | Optional. Defaults to `INFO`.                                               |
+| `PORT`           | The port the server listens on                      | Optional. Defaults to `8080`.                                               |
+
+## 📚 API Reference
 
 ### Deutsche Bahn APIs Used
 
