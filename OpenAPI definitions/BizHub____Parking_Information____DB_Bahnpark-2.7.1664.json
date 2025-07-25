@@ -1,0 +1,1350 @@
+{
+  "components": {
+    "parameters": {
+      "facilityIdParam": {
+        "description": "Unique identifier of a parking facility relative to this parking information service. It's value can change without further notice.",
+        "in": "path",
+        "name": "facilityId",
+        "required": true,
+        "schema": {
+          "example": "103198",
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "ErrorResponse": {
+        "content": {
+          "problem/json": {
+            "examples": {
+              "404101": {
+                "description": "Resource not found, check given id in path",
+                "summary": "HTTP-STATUS: 404, ErrorCode: 404101",
+                "value": {
+                  "detail": "Not found",
+                  "errorCode": 404101,
+                  "spanId": "7200d302-b0ab-4b98-a592-452ae51978b8",
+                  "status": "BAD_REQUEST",
+                  "title": "Bad request",
+                  "traceId": "fa885d9e-1ebb-489c-9116-678508f4356b"
+                }
+              },
+              "404102": {
+                "description": "The are is no station for given stopPlaceId, please try again with another one.",
+                "summary": "HTTP-STATUS: 404, ErrorCode: 404102",
+                "value": {
+                  "detail": "Not found",
+                  "errorCode": 404102,
+                  "spanId": "7200d302-b0ab-4b98-a592-452ae51978b8",
+                  "status": "BAD_REQUEST",
+                  "title": "Bad request",
+                  "traceId": "fa885d9e-1ebb-489c-9116-678508f4356b"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        },
+        "description": "Sometimes, an operation can return multiple errors with different HTTP status codes,\nbut all of them have the same response body. If you need support to an occured error, please commit the spandId and traceId with your\nsupport request."
+      }
+    },
+    "schemas": {
+      "Access": {
+        "description": "Information on how to access the parking facility",
+        "properties": {
+          "details": {
+            "description": "Information on how to access the parking facility depending on context.",
+            "items": {
+              "$ref": "#/components/schemas/AccessDetail"
+            },
+            "type": "array"
+          },
+          "exitMode": {
+            "$ref": "#/components/schemas/ExitMode"
+          },
+          "exitModeEn": {
+            "$ref": "#/components/schemas/ExitMode"
+          },
+          "openingHours": {
+            "$ref": "#/components/schemas/OpeningHours"
+          },
+          "outOfService": {
+            "$ref": "#/components/schemas/OutOfService"
+          },
+          "restrictions": {
+            "$ref": "#/components/schemas/Restrictions"
+          }
+        },
+        "type": "object"
+      },
+      "AccessDetail": {
+        "description": "Information on how to access the parking facility depending on type.",
+        "properties": {
+          "text": {
+            "description": "Details on how to access the parking facilicty, depending on type.",
+            "example": "Use your parking ticket to open the main entrance at night.",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AccessType"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "AccessType": {
+        "description": "A parking facility can be accessed in various ways. Currently access information on the following types is provided if available:\n  * MAIN_ACCESS: access to the main entrance for vehicles\n  * NIGHT_ACCESS: access at night\n  * UNKNOWN: unspecified type of access",
+        "enum": [
+          "MAIN_ACCESS",
+          "NIGHT_ACCESS",
+          "UNKNOWN"
+        ],
+        "example": "NIGHT_ACCESS",
+        "type": "string"
+      },
+      "AdditionalInformation": {
+        "additionalProperties": {
+          "type": "boolean"
+        },
+        "description": "Additional Information containing textual and boolean information as key-value-pairs",
+        "type": "object"
+      },
+      "Address": {
+        "description": "Address information including geolocation",
+        "properties": {
+          "city": {
+            "description": "city name",
+            "example": "Frankfurt am Main",
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "phone": {
+            "description": "phone number",
+            "example": "06947112020",
+            "nullable": true,
+            "type": "string"
+          },
+          "streetAndNumber": {
+            "description": "street including house number",
+            "example": "Jürgen-Ponto-Platz 1",
+            "type": "string"
+          },
+          "zip": {
+            "description": "zip code",
+            "example": "60329",
+            "type": "string"
+          }
+        }
+      },
+      "BikeParking": {
+        "description": "Some parking facilities of DB-Bahnpark offers locked and open places of bike parking. If the parking-facility doesn't offer any parking spaces for bike, this attribute is omitted. If the attribute exists, check Capacities for type \"BIKE_PARKING_LOCKED\" or \"BIKE_PARKING_OPEN\" to get information about number of bike parking spaces.",
+        "properties": {
+          "info": {
+            "description": "Common Information about bike parking within parking facility",
+            "type": "string"
+          },
+          "url": {
+            "description": "Further information e.g. reservation of bike locker",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Capacities": {
+        "description": "Number of parking spaces of various types.",
+        "properties": {
+          "_embedded": {
+            "items": {
+              "$ref": "#/components/schemas/Capacity"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "_embedded"
+        ],
+        "type": "object"
+      },
+      "Capacity": {
+        "description": "Number of parking spaces of a certain type.\\\n  Information on availability or number of parking spaces or capacity size or all three may be returned.",
+        "properties": {
+          "available": {
+            "description": "Is capacity of a certain type available? If true, the attribute free is filled. If the the total number of bike parking spaces: - BIKE_PARKING_LOCKED - BIKE_PARKING_OPEN are not null, than available is true.",
+            "type": "boolean"
+          },
+          "free": {
+            "$ref": "#/components/schemas/CapacitySize"
+          },
+          "time": {
+            "description": "The time the capacity was measured.\\\n  If no time is given, the returned data is independent of time.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "total": {
+            "description": "Total number of parking spaces of a certain capacity type.\\ The information is provider specific and may have been entered manually, so a numeric value cannot be guaranteed",
+            "example": "42",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CapacityType"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "CapacitySize": {
+        "description": "Size of capacity. Information about current capacity is only provided if data is available.",
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/CapacitySizeCategory"
+          },
+          "text": {
+            "description": "Textual description fo the capacity size.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CapacitySizeCategory": {
+        "description": "Capacity type.\\\n  The following sizes are currently available:\n  * 0_TO_10: up to 10 available places\n  * 11_TO_30: between 11 and 30 available places\n  * 31_TO_50: between 31 and 50 available places\n  * MORE_THAN_FIFTY: more than 50 available places\n  * UNKNOWN: size unknown",
+        "enum": [
+          "0_TO_10",
+          "11_TO_30",
+          "31_TO_50",
+          "MORE_THAN_FIFTY",
+          "UNKNOWN"
+        ],
+        "example": "MORE_THAN_FIFTY",
+        "type": "string"
+      },
+      "CapacityType": {
+        "default": "PARKING",
+        "description": "Capacity type.\\\n  The following types are currently available:\n  * PARKING - parking spaces available for short term parking\n  * HANDICAPPED_PARKING - parking spaces available for handicapped parking\n  * PARENT_AND_CHILD_PARKING - parking spaces for parents with children\n  * WOMAN_PARKING - parking spaces for women\n  * BIKE_PARKING_LOCKED - parking space for bicycles with lockers for rentals\n  * BIKE_PARKING_OPEN - open parking space for bicycles",
+        "enum": [
+          "PARKING",
+          "HANDICAPPED_PARKING",
+          "PARENT_AND_CHILD_PARKING",
+          "WOMAN_PARKING",
+          "BIKE_PARKING_LOCKED",
+          "BIKE_PARKING_OPEN"
+        ],
+        "example": "HANDICAPPED_PARKING",
+        "type": "string"
+      },
+      "Charging": {
+        "description": "Information on the availabilty of charging stations at the parking facility",
+        "properties": {
+          "details": {
+            "description": "Additional information e.g. on how to access charging stations available at the parking facility.",
+            "example": "Purchase a charging ticket",
+            "type": "string"
+          },
+          "hasChargingStation": {
+            "description": "True if the parking facility provides a charging station, false if not, empty if unknown",
+            "example": true,
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hasChargingStation"
+        ]
+      },
+      "Clearance": {
+        "description": "Limitations on vehicle size.",
+        "properties": {
+          "height": {
+            "description": "Maximum height of a vehicle accessing the parking facility.\\\n   The format and also the base (meter or centimeter) is provider-specific and currently may change between entries. Null if unknown",
+            "example": "3 m",
+            "maxLength": 100,
+            "nullable": true,
+            "type": "string"
+          },
+          "width": {
+            "description": "Maximum width of a vehicle accessing the parking facility.\\\n  The format and also the base (meter or centimeter) is provider-specific and currently may change between entries. Null if unknown",
+            "example": "3 m",
+            "maxLength": 100,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "width",
+          "height"
+        ]
+      },
+      "Equipment": {
+        "description": "Information on parking facility equipment, e.g. CCTV, toilets, ...",
+        "properties": {
+          "additionalInformation": {
+            "$ref": "#/components/schemas/AdditionalInformation"
+          },
+          "bikeParking": {
+            "$ref": "#/components/schemas/BikeParking"
+          },
+          "charging": {
+            "$ref": "#/components/schemas/Charging"
+          },
+          "details": {
+            "$ref": "#/components/schemas/EquipmentDetails"
+          }
+        },
+        "type": "object"
+      },
+      "EquipmentDetail": {
+        "description": "The following equipment types are available\n  * CCTV\n  * GATED\n  * LIGHTED\n  * ATTENDED\n  * MOTOR_CYCLE_FRIENDLY\n  * LIFT\n  * TOILETS\n  * EXTRA_SECURITY\n  * ESCALATORS\n  * WOMAN_PARKING_SPACES\n  * CARWASH\n  * UNKNOWN unspecified equipment",
+        "enum": [
+          "CCTV",
+          "GATED",
+          "LIGHTED",
+          "ATTENDED",
+          "MOTOR_CYCLE_FRIENDLY",
+          "LIFT",
+          "TOILETS",
+          "EXTRA_SECURITY",
+          "ESCALATORS",
+          "WOMAN_PARKING_SPACES",
+          "CARWASH",
+          "UNDEFINED"
+        ],
+        "example": "LIFT",
+        "type": "string"
+      },
+      "EquipmentDetails": {
+        "description": "The list of equipment of a parking facility",
+        "properties": {
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/EquipmentDetail"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "details"
+        ],
+        "type": "object"
+      },
+      "Error": {
+        "allOf": [
+          {
+            "properties": {
+              "detail": {
+                "description": "Detailed information on the concrete error situation.",
+                "type": "string"
+              },
+              "errorCode": {
+                "description": "specific error code\n<ul>\n    <li>first three digits represent the http-code</li>\n    <li>next three digits from 0-499 for generic errors</li>\n    <li>next three digits from 500-999 for service specific error</li>\n</ul>\ncodes:\n<ul>\n    <li>400001 - INVALID_PARAMETERS</li>\n    <li>400002 - MISSING_REQUEST_BODY</li>\n    <li>400003 - INVALID_TYPE</li>\n    <li>400004 - MISSING_REQUEST_PART_WITHIN_MULTIPART_FORM_DATA</li>\n    <li>400005 - BAD_REQUEST</li>\n    <li>401001 - UNAUTHORIZED</li>\n    <li>402001 - PAYMENT_REQUIRED</li>\n    <li>403001 - FORBIDDEN</li>\n    <li>404001 - NOT_FOUND</li>\n    <li>405001 - METHOD_NOT_ALLOWED</li>\n    <li>406001 - NOT_ACCEPTABLE</li>\n    <li>407001 - PROXY_AUTHENTICATION_REQUIRED</li>\n    <li>408001 - REQUEST_TIMEOUT</li>\n    <li>409001 - CONFLICT</li>\n    <li>410001 - GONE</li>\n    <li>411001 - LENGTH_REQUIRED</li>\n    <li>412001 - PRECONDITION_FAILED</li>\n    <li>413001 - PAYLOAD_TOO_LARGE</li>\n    <li>414001 - URI_TOO_LONG</li>\n    <li>415001 - UNSUPPORTED_MEDIA_TYPE</li>\n    <li>416001 - RANGE_NOT_SATISFIABLE</li>\n    <li>417001 - EXPECTATION_FAILED</li>\n    <li>421001 - MISDIRECTED_REQUEST</li>\n    <li>422001 - UNPROCESSABLE_ENTITY</li>\n    <li>423001 - LOCKED</li>\n    <li>424001 - FAILED_DEPENDENCY</li>\n    <li>425001 - TOO_EARLY</li>\n    <li>426001 - UPGRADE_REQUIRED</li>\n    <li>428001 - PRECONDITION_REQUIRED</li>\n    <li>429001 - TOO_MANY_REQUESTS</li>\n    <li>431001 - REQUEST_HEADER_FIELDS_TOO_LARGE</li>\n    <li>451001 - UNAVAILABLE_FOR_LEGAL_REASONS</li>\n    <li>500001 - UNSPECIFIED</li>\n    <li>500002 - INTERNAL_EXCEPTION</li>\n    <li>500003 - UNHANDLED_INTERNAL_EXCEPTION</li>\n    <li>500004 - INTERNAL_SERVER_ERROR</li>\n    <li>501001 - ROUTE_NOT_FOUND</li>\n    <li>501002 - EXTERNAL_SERVICE_ERROR</li>\n    <li>501003 - NOT_IMPLEMENTED</li>\n    <li>502001 - BAD_GATEWAY</li>\n    <li>503001 - SERVICE_UNAVAILABLE</li>\n    <li>503002 - EXTERNAL_SERVICE_CLIENT_ERROR</li>\n    <li>504001 - GATEWAY_TIMEOUT</li>\n    <li>505001 - HTTP_VERSION_NOT_SUPPORTED</li>\n    <li>506001 - VARIANT_ALSO_NEGOTIATES</li>\n    <li>507001 - INSUFFICIENT_STORAGE</li>\n    <li>508001 - LOOP_DETECTED</li>\n    <li>509001 - BANDWIDTH_LIMIT_EXCEEDED</li>\n    <li>510001 - NOT_EXTENDED</li>\n    <li>511001 - NETWORK_AUTHENTICATION_REQUIRED </li>\n</ul>\n",
+                "type": "integer"
+              },
+              "errors": {
+                "items": {
+                  "properties": {
+                    "detail": {
+                      "description": "Detailed information on the concrete error situation",
+                      "type": "string"
+                    },
+                    "field": {
+                      "description": "Name of the affected field/element of the query",
+                      "type": "string"
+                    },
+                    "title": {
+                      "description": "General description of the error type, which is independent of the concrete error instance.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "instance": {
+                "description": "URI to identify this concrete error instance, e.g. in log messages.",
+                "type": "string"
+              },
+              "spanId": {
+                "deprecated": true,
+                "description": "Identification of the span context",
+                "type": "string"
+              },
+              "status": {
+                "description": "http status of the service in which the error occurred. This can differ from the status code of the http response if the response was transmitted over several intermediate stations.",
+                "type": "string"
+              },
+              "title": {
+                "description": "General description of the error type, which is independent of the concrete error instance.",
+                "type": "string"
+              },
+              "traceId": {
+                "deprecated": true,
+                "description": "Identification of the trace context",
+                "type": "string"
+              },
+              "type": {
+                "description": "URI for error type, under this uri a error description can be found.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "type": "object"
+          },
+          {
+            "properties": {
+              "errorCode": {
+                "$ref": "#/components/schemas/ErrorCode"
+              }
+            }
+          }
+        ]
+      },
+      "ErrorCode": {
+        "description": "Shows all error codes which can occur. See default response under each endpoint for more information.\n\n- 4004101\n- 4004102",
+        "enum": [
+          404101,
+          404102
+        ],
+        "type": "integer"
+      },
+      "ExitMode": {
+        "description": "How to exit the facility, e.g. paying at a parking terminal, using a parking barrier.",
+        "example": "Pay at the parking terminal at the main entrance",
+        "type": "string"
+      },
+      "Location": {
+        "description": "Geolocation data",
+        "properties": {
+          "latitude": {
+            "example": 50.10967,
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "example": 8.66893,
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ]
+      },
+      "Name": {
+        "description": "Name of a facility plus the context the name is used in",
+        "properties": {
+          "context": {
+            "$ref": "#/components/schemas/NameContext"
+          },
+          "name": {
+            "description": "Name of the parking facility relative to context.",
+            "example": "Parken am Busbahnhof",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "context"
+        ],
+        "type": "object"
+      },
+      "NameContext": {
+        "description": "The context the name is used in. The following values are available\n  * NAME - default name\n  * DISPLAY - name recommended by the provider to be displayed in a web interface\n  * LABEL - Label of a parking facility, e.g. used on a map, e.g. \"P3\"\n  * SLOGAN - slogan given to the parking facility by the provider\n  * UNKNOWN - unspecified name context",
+        "enum": [
+          "NAME",
+          "DISPLAY",
+          "LABEL",
+          "SLOGAN",
+          "UNKNOWN"
+        ],
+        "example": "SLOGAN",
+        "type": "string"
+      },
+      "Occupancy": {
+        "properties": {
+          "capacity": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timeSegment": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "vacancyCategory": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "vacancyText": {
+            "type": "string"
+          },
+          "validData": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "OpeningHours": {
+        "description": "Information on the opening hours of the parking facility",
+        "properties": {
+          "is24h": {
+            "description": "true if the facility is open 24/7, false if not, empty if unknown",
+            "example": true,
+            "nullable": true,
+            "type": "boolean"
+          },
+          "text": {
+            "description": "A textual unstructered description of the opening hours",
+            "example": "Open at all hours",
+            "type": "string"
+          },
+          "textEn": {
+            "description": "A textual unstructered description of the opening hours",
+            "example": "Open at all hours",
+            "type": "string"
+          }
+        },
+        "required": [
+          "is24h"
+        ],
+        "type": "object"
+      },
+      "Operator": {
+        "description": "The operator of the parking facility",
+        "properties": {
+          "name": {
+            "description": "Name of the operator",
+            "example": "DB Bahnpark",
+            "type": "string"
+          },
+          "url": {
+            "description": "URL of the operator",
+            "example": "https://www.dbbahnpark.de/",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "OutOfService": {
+        "description": "Is the parking facility out of service and, if so, why.",
+        "properties": {
+          "isOutOfService": {
+            "description": "True if the parking facility is out of service, false if not, empty if unknown",
+            "example": true,
+            "nullable": true,
+            "type": "boolean"
+          },
+          "reason": {
+            "description": "Text to display if the parking facility is out of service",
+            "example": "Out of Service due to repairs",
+            "type": "string"
+          },
+          "reasonEn": {
+            "description": "Text to display if the parking facility is out of service",
+            "example": "Out of Service due to repairs",
+            "type": "string"
+          }
+        },
+        "required": [
+          "isOutOfService"
+        ]
+      },
+      "ParkingFacilities": {
+        "description": "A List of parking facilities",
+        "properties": {
+          "_embedded": {
+            "items": {
+              "$ref": "#/components/schemas/ParkingFacility"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "_embedded"
+        ],
+        "type": "object"
+      },
+      "ParkingFacility": {
+        "description": "A parking facility is location where multiple cars can be parked, e.g. a parking lot, a parking garage.",
+        "properties": {
+          "access": {
+            "$ref": "#/components/schemas/Access"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "capacity": {
+            "items": {
+              "$ref": "#/components/schemas/Capacity"
+            },
+            "type": "array"
+          },
+          "equipment": {
+            "$ref": "#/components/schemas/Equipment"
+          },
+          "hasPrognosis": {
+            "description": "True if a prognosis on available spaces is available for this parking facility, false if not, empty if unknown",
+            "example": true,
+            "nullable": true,
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Unique identifier of a parking facility relative to this parking information service. It's value can change without further notice.",
+            "example": "103198",
+            "type": "string"
+          },
+          "name": {
+            "description": "A parking facility may have multiple names, e.g. for display, a slogan, ...",
+            "items": {
+              "$ref": "#/components/schemas/Name"
+            },
+            "type": "array"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/Operator"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/Provider"
+          },
+          "reservation": {
+            "$ref": "#/components/schemas/ReservationInformation"
+          },
+          "station": {
+            "$ref": "#/components/schemas/Station"
+          },
+          "tariff": {
+            "$ref": "#/components/schemas/Tariff"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Type"
+          },
+          "url": {
+            "description": "URL of the parking facility",
+            "example": "https://www.example.de/parken/garage/am_hauptbahnhof",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "address"
+        ],
+        "type": "object"
+      },
+      "PaymentDetails": {
+        "description": "Details on available payment options for a tariff",
+        "properties": {
+          "detail": {
+            "description": "Textual information on tariff details",
+            "example": "discount details available at the counter",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/PaymentInfoType"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "PaymentInfoType": {
+        "description": "The following tariff info types are available\n  * PAYMENT_TYPE\n  * PAYMENT_OPTIONS\n  * PAYMENT_MOBILE - payment using a mobile phone\n  * PAYMENT_CUSTOMER_CARD - payment using a customer card\n  * UNKNOWN unspecified tariff info type",
+        "enum": [
+          "PAYMENT_TYPE",
+          "PAYMENT_OPTIONS",
+          "PAYMENT_MOBILE",
+          "PAYMENT_CUSTOMER_CARD",
+          "UNKNOWN"
+        ],
+        "example": "PAYMENT_TYPE",
+        "type": "string"
+      },
+      "PriceGroup": {
+        "description": "Information on a price group of a parking facility",
+        "properties": {
+          "groupLabel": {
+            "description": "Label of a price group",
+            "example": "PG 1",
+            "type": "string"
+          },
+          "groupName": {
+            "description": "Name of the price group",
+            "example": "Preisgruppe 1",
+            "type": "string"
+          }
+        },
+        "required": [
+          "groupName",
+          "groupLabel"
+        ]
+      },
+      "PriceModel": {
+        "description": "Details on a price model of a parking facility",
+        "properties": {
+          "duration": {
+            "description": "Length of parking time allowed using this price.\\\n  This field is filled provider specific, maybe manually. A consistent format cannot be guarenteed.",
+            "example": "2 hours",
+            "type": "string"
+          },
+          "group": {
+            "$ref": "#/components/schemas/PriceGroup"
+          },
+          "period": {
+            "description": "Non-structured information on the time of day the price can be applied.",
+            "example": "7 pm to 6 am",
+            "type": "string"
+          },
+          "price": {
+            "description": "Price in Euro",
+            "example": 2.5,
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "price"
+        ],
+        "type": "object"
+      },
+      "Prognoses": {
+        "description": "Prognoses information about a given parking facility",
+        "properties": {
+          "_embedded": {
+            "items": {
+              "$ref": "#/components/schemas/Prognosis"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "_embedded"
+        ],
+        "type": "object"
+      },
+      "Prognosis": {
+        "properties": {
+          "occupancy": {
+            "$ref": "#/components/schemas/Occupancy"
+          },
+          "quality": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "qualityMessage": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Provider": {
+        "description": "Data provider specific information of a parking facility",
+        "properties": {
+          "facilityNumber": {
+            "description": "Number of the facility that is unique relative to the provider system.",
+            "example": "42",
+            "type": "string"
+          },
+          "isSpecialProductDb": {
+            "description": "True if the facility has a special DB product, false if not, null if unknown.",
+            "example": true,
+            "nullable": true,
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ProviderSource"
+          }
+        },
+        "required": [
+          "facilityNumber",
+          "isSpecialProductDB",
+          "source"
+        ],
+        "type": "object"
+      },
+      "ProviderSource": {
+        "description": "Shows the source of the parking facility information from the data provider.\n\nAt least, capacitiy information will be available, for all parking facilities whose source is \"DB_BAHNPARK\".",
+        "enum": [
+          "DB_BAHNPARK",
+          "PARKOPEDIA",
+          "UNKNOWN"
+        ],
+        "example": "DB_BAHNPARK",
+        "type": "string"
+      },
+      "ReservationInformation": {
+        "description": "Information if reservation is available and if so, how",
+        "properties": {
+          "details": {
+            "description": "Information on how to make a reservation for this parking facility",
+            "example": "call 069-4711-2020",
+            "type": "string"
+          },
+          "hasReservation": {
+            "description": "True if a reservation is possible, false if not, empty if unknown.",
+            "example": true,
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hasReservation"
+        ],
+        "type": "object"
+      },
+      "Restrictions": {
+        "description": "Restrictions on vehicles accessing the parking facility.",
+        "properties": {
+          "additionalRestrictions": {
+            "description": "Additional restrictions on vehicles entering the facility",
+            "example": "gas propulsion not allowed",
+            "type": "string"
+          },
+          "allowedPropulsion": {
+            "description": "Only vehicles with the named propulsions may enter the facility.",
+            "example": "gasoline",
+            "type": "string"
+          },
+          "clearance": {
+            "$ref": "#/components/schemas/Clearance"
+          }
+        },
+        "required": [
+          "clearance"
+        ],
+        "type": "object"
+      },
+      "Station": {
+        "description": "Information on the station nearby - if available",
+        "properties": {
+          "distance": {
+            "description": "Distance of a parking facility to the nearest station entry",
+            "example": "125 m",
+            "type": "string"
+          },
+          "name": {
+            "description": "Station name",
+            "type": "string"
+          },
+          "stationId": {
+            "$ref": "#/components/schemas/StationId"
+          }
+        },
+        "required": [
+          "stationId"
+        ],
+        "type": "object"
+      },
+      "StationId": {
+        "description": "Identifier of a train station",
+        "properties": {
+          "identifier": {
+            "description": "The value, e.g. an EVA number, a RIL 100 code or a Stada identifier",
+            "example": "8011160",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/StationIdType"
+          }
+        },
+        "required": [
+          "identifierType",
+          "identifier"
+        ],
+        "type": "object"
+      },
+      "StationIdType": {
+        "description": "A station id can be of the following types\n  * RIL100\n  * STADA\n  * EVA",
+        "enum": [
+          "RIL100",
+          "STADA",
+          "EVA",
+          "UNKNOWN"
+        ],
+        "example": "EVA",
+        "type": "string"
+      },
+      "Tariff": {
+        "description": "Information on tarifs when parking",
+        "properties": {
+          "information": {
+            "$ref": "#/components/schemas/TariffInfos"
+          },
+          "models": {
+            "$ref": "#/components/schemas/TariffModels"
+          },
+          "prices": {
+            "description": "Tariff prices for parking",
+            "items": {
+              "$ref": "#/components/schemas/PriceModel"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TariffDetails": {
+        "description": "Information on tariff information",
+        "properties": {
+          "detail": {
+            "description": "Textual information on tariff details",
+            "example": "discount details available at the counter",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TariffInfoType"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "TariffInfo": {
+        "description": "Detailed Information on parking tariffs",
+        "properties": {
+          "paymentDetails": {
+            "description": "Info on available payment options for the tariff",
+            "items": {
+              "$ref": "#/components/schemas/PaymentDetails"
+            },
+            "type": "array"
+          },
+          "tariffDetails": {
+            "description": "Details on the parking facility tariff",
+            "items": {
+              "$ref": "#/components/schemas/TariffDetails"
+            },
+            "type": "array"
+          },
+          "tariffIdentifier": {
+            "description": "Identifier of the tariff",
+            "example": "daytime",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tariffIdentifier",
+          "tariffDetails"
+        ],
+        "type": "object"
+      },
+      "TariffInfoType": {
+        "description": "The following tariff info types are available\n  * SPECIAL\n  * FREE_PARKING_TIME - length of free parking time\n  * MAX_PARKING_TIME - maximum parking time\n  * POINT_OF_SALE\n  * DISCOUNT\n  * NOTES\n  * REMARKS\n  * OPTIONS\n  * UNKNOWN unspecified tariff info type",
+        "enum": [
+          "SPECIAL",
+          "FREE_PARKING_TIME",
+          "MAX_PARKING_TIME",
+          "POINT_OF_SALE",
+          "DISCOUNT",
+          "NOTES",
+          "REMARKS",
+          "OPTIONS",
+          "UNKNOWN"
+        ],
+        "example": "DISCOUNT",
+        "type": "string"
+      },
+      "TariffInfos": {
+        "description": "Detailed Information on parking tariffs",
+        "properties": {
+          "dynamic": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "An array with key/value",
+            "type": "object"
+          },
+          "fixed": {
+            "items": {
+              "$ref": "#/components/schemas/TariffInfo"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TariffModelDetails": {
+        "description": "Details on a tarif modell",
+        "properties": {
+          "availability": {
+            "description": "True if the tariff of the named type is available, false if not.\\\n  If this field is not filled, the availibility is unknown.",
+            "example": false,
+            "nullable": true,
+            "type": "boolean"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TariffModelType"
+          }
+        },
+        "required": [
+          "type",
+          "availability"
+        ],
+        "type": "object"
+      },
+      "TariffModelType": {
+        "description": "Tariff modells of the following types are available\n  * DAY_TICKET_PARK_AND_RAIL\n  * DAY_TICKET_BAHN_COMFORT\n  * DAY_TICKET_BAHN_CARD\n  * MONTHLY_TICKETS\n  * MONTHLY_TICKETS_PARK_AND_RIDE\n  * LONG_TERM_TICKET (Contract lasting at least 3 month)\n  * FREE_AFTER_HOURS - is free parking available after hours?",
+        "enum": [
+          "DAY_TICKET_PARK_AND_RAIL",
+          "DAY_TICKET_BAHN_COMFORT",
+          "DAY_TICKET_BAHN_CARD",
+          "MONTHLY_TICKETS",
+          "MONTHLY_TICKETS_PARK_AND_RIDE",
+          "LONG_TERM_TICKET",
+          "FREE_AFTER_HOURS",
+          "UNKNOWN"
+        ],
+        "example": "DAY_TICKET_BAHN_CARD",
+        "type": "string"
+      },
+      "TariffModels": {
+        "description": "List of special tarif modells and their availability",
+        "properties": {
+          "dynamic": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "description": "A list of other models and their availability",
+            "type": "object"
+          },
+          "fixed": {
+            "description": "A list of models for known tariffs",
+            "items": {
+              "$ref": "#/components/schemas/TariffModelDetails"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Type": {
+        "description": "Type of a parking facility",
+        "properties": {
+          "abbreviation": {
+            "description": "Abbreviation of a parking facility type name",
+            "example": "roof",
+            "type": "string"
+          },
+          "name": {
+            "description": "Parking Facility type name",
+            "example": "under roof",
+            "type": "string"
+          },
+          "nameEn": {
+            "description": "Parking Facility type name",
+            "example": "under roof",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "ClientID": {
+        "in": "header",
+        "name": "DB-Client-ID",
+        "type": "apiKey",
+        "x-key-type": "client_id"
+      },
+      "ClientSecret": {
+        "in": "header",
+        "name": "DB-Api-Key",
+        "type": "apiKey",
+        "x-key-type": "client_secret"
+      }
+    }
+  },
+  "info": {
+    "contact": {
+      "email": "doServices.Sirius.Team@deutschebahn.com",
+      "name": "the developers"
+    },
+    "description": "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\n\n## Info\n\n* powered by **BusinessHub**\n* in cooperation with **[DB Bahnpark](https://www.dbbahnpark.de/)**\n* developed with ❤ by **doServices Sirius**\n\n\n## Capabilities\n\nThis service provides parking information around train stations. This information includes:\n* prices and tariffs\n* access information, like opening hours\n* restrictions like clearance for height and width\n* equipment like charging stations\n* capacity like number of parking lots\n\nThe data is provided by DB Bahnpark.\n\n\n## Limitations\n\n* only parking information around train stations are currently provided\n* search can only be performed using an id for train stations. Supported are ril100, eva number, globalID and stadaID. For more Information have a look a the query parameter `stopPlaceId`\n* due to internal caching, the data might not always be updated in realtime\n* non DB Systel customers can only access information provided by DB Bahnpark\n\n\n## Authorization\n\nTo use this service, provide credentials via the headers `DB-Api-Key` and `DB-Client-Id` or use the \"Try it out\" to enter those.\n\n\n## Error-Handling\n\nIf you are using this api and an error occurs, check the examples under *Responses* at each endpoint first or look at the ErrorCode object in the schemas section.\nIf you have further question or an unknown error occured don't hesitate to contact us by [Email](mailto:doServices.Sirius.Team@deutschebahn.com).\n\n\n/////////////////////////////////////////// ***doBetter*** /// ***doFaster*** /// ***doServices*** ////////////////////",
+    "license": {
+      "name": "DB Systel GmbH proprietary License",
+      "url": "http://www.dbsystel.de/licenses/LICENSE-2.0.html"
+    },
+    "title": "BizHub // Parking Information // DB Bahnpark",
+    "version": "2.7.1664",
+    "x-ibm-name": "parking-information-db-bahnpark"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/parking-facilities": {
+      "get": {
+        "description": "This endpoint lists parking facilities matching filtering criteria.\\\n  Details on a parking facility include\n  * infrastructural information\n  * pricing\n  * capacity\n\n  You may search for parking facilities identified by one of the following IDs:\n\n  * StadaID: An internally used identifier consisting of a 32bit Integer (e.g. 1071)\n  * EVA Number: A 7 digit number, identifying a single stop (e.g. 8000001)\n  * RIL 100: A string consisting of 1 to 6 letters (e.g. FF) <a href=\"https://fahrweg.dbnetze.com/fahrweg-de/kunden/betrieb/betriebsstellen-1393360\">List of all RIL 100 IDs</a>\n  * GlobalID: Also known as DHID (an extension of the CEN Standard IFOPT) (e.g. de:11000:900003201) \\\n    A globally harmonized identifier, extended for use in Germany. See <a href=\"https://www.vdv.de/schriften---mitteilungen.aspx?mode=detail&id=6be2aa3f-1153-46ed-97c5-1b2a4ef17f7e&coriander=V3_249936b2-e055-7652-c6af-01badd1cf481\">VDV Schrift 432 (German)</a> for more information",
+        "operationId": "getParkingFacilities",
+        "parameters": [
+          {
+            "description": "Id of a station. Can be StadaID, RIL 100, EVA Number or GlobalID.",
+            "example": "1866",
+            "in": "query",
+            "name": "stopPlaceId",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of a station. Ignored if stopPlaceId is provided.",
+            "examples": {
+              "Berlin Südkreuz": {
+                "value": "Berlin Südkreuz"
+              },
+              "Frankfurt": {
+                "value": "Frankfurt"
+              },
+              "Frankfurt(Main)Hbf": {
+                "value": "Frankfurt(Main)Hbf"
+              }
+            },
+            "in": "query",
+            "name": "stationName",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only include parking spaces with passenger relevance, so supermarket customer spaces are excluded for instance.",
+            "in": "query",
+            "name": "withPassengerRelevance",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "(Start of) The zip Code of the parking facilities.",
+            "examples": {
+              "partialZipCodeFrankfurt": {
+                "value": "603"
+              },
+              "zipCodeFrankfurt": {
+                "value": "60329"
+              }
+            },
+            "in": "query",
+            "name": "zipCode",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Accept",
+            "schema": {
+              "default": "application/vnd.parkinginformation.db-bahnpark.v1+json",
+              "enum": [
+                "application/vnd.parkinginformation.db-bahnpark.v1+json"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingFacilities"
+                }
+              }
+            },
+            "description": "In case of success details on the parking facilities assigned to the stop place or the radius around a geo location by the provider are returned. If no parking facility for the given data is found, then an empty array is returned."
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "Parking Facilities assigned to a stop place",
+        "tags": [
+          "Facilities"
+        ]
+      }
+    },
+    "/parking-facilities/{facilityId}": {
+      "get": {
+        "description": "Details on a parking facility contain\n  * infrastructural information\n  * pricing\n  * capacity",
+        "operationId": "getParkingFacilityById",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/facilityIdParam"
+          },
+          {
+            "in": "header",
+            "name": "Accept",
+            "schema": {
+              "default": "application/vnd.parkinginformation.db-bahnpark.v1+json",
+              "enum": [
+                "application/vnd.parkinginformation.db-bahnpark.v1+json"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingFacility"
+                }
+              }
+            },
+            "description": "In case of success details on the parking facility with the given facilityId are returned"
+          },
+          "404": {
+            "description": "No facility was found for the given id."
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "Details on a single parking facility with the given Id.",
+        "tags": [
+          "Facilities"
+        ]
+      }
+    },
+    "/parking-facilities/{facilityId}/capacities": {
+      "get": {
+        "operationId": "getCapacitiesOfParkingFacility",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/facilityIdParam"
+          },
+          {
+            "in": "header",
+            "name": "Accept",
+            "schema": {
+              "default": "application/vnd.parkinginformation.db-bahnpark.v1+json",
+              "enum": [
+                "application/vnd.parkinginformation.db-bahnpark.v1+json"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Capacities"
+                }
+              }
+            },
+            "description": "In case of success the capacity data is returned.\\\n  If no capacity data is available, an empty array is returned."
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "Overall capacity data for a particular space.",
+        "tags": [
+          "Capacity"
+        ]
+      }
+    },
+    "/parking-facilities/{facilityId}/prognoses": {
+      "get": {
+        "operationId": "getPrognosesOfParkingFacility",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/facilityIdParam"
+          },
+          {
+            "in": "header",
+            "name": "Accept",
+            "schema": {
+              "default": "application/vnd.parkinginformation.db-bahnpark.v1+json",
+              "enum": [
+                "application/vnd.parkinginformation.db-bahnpark.v1+json"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "datetime",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prognoses"
+                }
+              }
+            },
+            "description": "In case of success the prognoses data is returned.\\ If no prognoses data is available, the result object will be empty."
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "Overall prognoses data for a particular space for the next two hours",
+        "tags": [
+          "Prognoses"
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "ClientID": [],
+      "ClientSecret": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://apis.deutschebahn.com/db-api-marketplace/apis/parking-information/db-bahnpark/v2"
+    }
+  ],
+  "tags": [
+    {
+      "description": "A parking facility is a location where multiple cars can be parked, e.g. a parking lot, a parking garage.",
+      "name": "Facilities"
+    },
+    {
+      "description": "Information on overall, current and expected capacity of a parking facility. Capacity is described by either availability, number of spaces or capacity size. Capacity prognoses are returned relative to a point in time and a type (e.g. overall numbers, handicapped parking, ...)",
+      "name": "Capacity"
+    }
+  ],
+  "x-ibm-configuration": {
+    "application-authentication": {
+      "certificate": false
+    },
+    "cors": {
+      "enabled": true
+    },
+    "enforced": true,
+    "phase": "realized",
+    "testable": true,
+    "type": "rest"
+  },
+  "x-ibm-endpoints": [
+    {
+      "url": "https://apis.deutschebahn.com/db-api-marketplace/apis/parking-information/db-bahnpark/v2"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+# Default gcloudignore file:
+# https://cloud.google.com/sdk/gcloud/reference/topic/gcloudignore
+.gcloudignore
+# Individual files can be unignored with a leading !.
+# For example, !.gcloudignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Git
+.git/
+.gitignore
+
+# IDE / Editor specific
+.idea/
+.vscode/
+*.swp
+
+# OS-specific
+.DS_Store
+# Dockerfile  # Keep Dockerfile for Cloud Build

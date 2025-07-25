@@ -1,0 +1,2932 @@
+{
+  "components": {
+    "parameters": {
+      "acceptLanguage": {
+        "description": "A list of the languages/localizations the user would like to see the results in. For user privacy and ease of use on the TO side, this list should be kept as short as possible, ideally just one language tag from the list in operator/information",
+        "example": "de",
+        "in": "header",
+        "name": "Accept-Language",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "addressedTo": {
+        "description": "The ID of the maas operator that has to receive this message",
+        "example": "1324A-DFB3482-32ACD",
+        "in": "header",
+        "name": "addressed-to",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "api": {
+        "description": "API description, can be TOMP or maybe other (specific/derived) API definitions",
+        "example": "TOMP",
+        "in": "header",
+        "name": "Api",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "apiVersion": {
+        "description": "Version of the API.",
+        "example": "1.5.0",
+        "in": "header",
+        "name": "Api-Version",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "maasCustomerId": {
+        "description": "id of the customer within the MP platform",
+        "example": "98765-4321-0",
+        "in": "path",
+        "name": "maas-customer-id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "maasId": {
+        "description": "The ID of the sending maas operator. Will be filled automatically.",
+        "example": "tomp-b2b",
+        "in": "header",
+        "name": "maas-id",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "202Accepted": {
+        "description": "Request was successfully accepted for processing but has not yet completed.",
+        "headers": {
+          "Location": {
+            "description": "The URI where the created or updated resource will eventually be found.",
+            "example": "/bookings/1234",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "204NoContent": {
+        "description": "Request was successful, no content to return."
+      },
+      "400BadRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        },
+        "description": "Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code."
+      },
+      "401Unauthorized": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        },
+        "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response."
+      },
+      "403Forbidden": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        },
+        "description": "The client does not have access rights to the content, i.e. they are unauthorized, so server is rejecting to give proper response. Unlike 401, the client's identity is known to the server."
+      },
+      "404NotFound": {
+        "description": "The requested resources does not exist or the requester is not authorized to see it or know it exists."
+      },
+      "409Conflict": {
+        "description": "The request will not be fulfilled. The request itself is legal, but the content conflicts with the server and might be stale. The user might try again after looking up the current state of the resource."
+      },
+      "410Gone": {
+        "description": "The requested resource is no longer available. This is permanent."
+      }
+    },
+    "schemas": {
+      "address": {
+        "description": "street address, including number OR PO box number, eventually extended with internal reference like room number, could match Content-Language",
+        "properties": {
+          "city": {
+            "description": "specified city or town, consistent with areaReference",
+            "type": "string"
+          },
+          "country": {
+            "$ref": "#/components/schemas/country"
+          },
+          "province": {
+            "description": "province or region, consistent with areaReference",
+            "type": "string"
+          },
+          "street": {
+            "description": "street, consistent with streetAddress",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "amountOfMoney": {
+        "properties": {
+          "amount": {
+            "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT",
+            "example": 9.95,
+            "format": "float",
+            "minimum": 0,
+            "type": "number"
+          },
+          "amountExVat": {
+            "example": 8.95,
+            "format": "float",
+            "minimum": 0,
+            "type": "number"
+          },
+          "currencyCode": {
+            "description": "ISO 4217 currency code",
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "vatCountryCode": {
+            "$ref": "#/components/schemas/country"
+          },
+          "vatRate": {
+            "description": "value added tax rate (percentage of amount)",
+            "example": 21,
+            "format": "float",
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "asset": {
+        "properties": {
+          "id": {
+            "description": "Identifier of an asset. Whenever used in Operator Information changed after every trip (GDPR).",
+            "type": "string"
+          },
+          "licensePlate": {
+            "description": "the usage of this field requires a secure environment. When assets are published in available-assets, this field can be used to track assets. Be aware of this.",
+            "type": "string"
+          },
+          "overriddenProperties": {
+            "$ref": "#/components/schemas/assetProperties"
+          },
+          "stateOfCharge": {
+            "description": "percentage of charge available",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "assetClass": {
+        "description": "These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.",
+        "enum": [
+          "AIR",
+          "BUS",
+          "TROLLEYBUS",
+          "TRAM",
+          "COACH",
+          "RAIL",
+          "INTERCITYRAIL",
+          "URBANRAIL",
+          "METRO",
+          "WATER",
+          "CABLEWAY",
+          "FUNICULAR",
+          "TAXI",
+          "SELFDRIVE",
+          "FOOT",
+          "BICYCLE",
+          "MOTORCYCLE",
+          "CAR",
+          "SHUTTLE",
+          "OTHER",
+          "PARKING",
+          "MOPED",
+          "STEP",
+          "FERRY"
+        ],
+        "type": "string"
+      },
+      "assetProperties": {
+        "description": "Aspects of an asset or assetType. Most aspects are optional and should only be used when applicable.",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/place"
+          },
+          "name": {
+            "description": "name of asset (type)",
+            "type": "string"
+          }
+        }
+      },
+      "assetType": {
+        "properties": {
+          "assetClass": {
+            "$ref": "#/components/schemas/assetClass"
+          },
+          "assetSubClass": {
+            "description": "a more precise classification of the asset.",
+            "enum": [
+              "BIKE",
+              "CARGOPEDELEC",
+              "PEDELEC"
+            ],
+            "type": "string"
+          },
+          "assets": {
+            "description": "use this field only in the map-oriented scenario or in the committed bookings. Don't use it in public data (to prevent GDPR issues).",
+            "items": {
+              "$ref": "#/components/schemas/asset"
+            },
+            "type": "array"
+          },
+          "id": {
+            "description": "Unique identifier of an asset type,",
+            "type": "string"
+          },
+          "nrAvailable": {
+            "type": "integer"
+          },
+          "stationId": {
+            "description": "If stationId is present, the nrAvailable is expected to find the availability at that particular station",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "booking": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/bookingRequest"
+          },
+          {
+            "properties": {
+              "departureTime": {
+                "description": "The initial departure time (over all legs)",
+                "format": "date-time",
+                "type": "string"
+              },
+              "legs": {
+                "description": "The legs of this booking, generally just one for simple legs, in order of how they will be travelled. If this part is not present, it means that there is only one leg. This leg can be constructed * leg[0].id = booking.id * leg[0].departureTime = booking.departureTime * leg[0].arrivalTime = booking.arrivalTime * leg[0].assetType = booking.mainAssetType * leg[0].pricing = booking.pricing This approach is not allowed in the trip execution part",
+                "items": {
+                  "$ref": "#/components/schemas/leg"
+                },
+                "type": "array"
+              },
+              "state": {
+                "$ref": "#/components/schemas/bookingState"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "description": "The booking information describing the state and details of an agreed upon trip",
+        "type": "object"
+      },
+      "bookingOperation": {
+        "description": "operation on the bookingOption",
+        "properties": {
+          "extendReason": {
+            "description": "in case `operation` is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.",
+            "enum": [
+              "BOOKING_PENDING",
+              "PAYMENT_PENDING",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "operation": {
+            "description": "the operation that is requested. When extra time is needed to complete the initial booking, EXTEND_EXPIRY_TIME can be used. In the response there is the 'Expiry' header field to supply the new expiry timestamp.",
+            "enum": [
+              "CANCEL",
+              "DENY",
+              "COMMIT",
+              "EXTEND_EXPIRY_TIME"
+            ],
+            "type": "string"
+          },
+          "origin": {
+            "description": "This operation can be done on behalf of another party. The MP can act on behalf of the END_USER (cancel this booking for me); to override the default origin. In case this field is missing, it must be assumed that the events the MP is sending, this field should contain \"MP\". And in case the TO is sending, \"TO\".",
+            "enum": [
+              "TO",
+              "MP",
+              "END_USER",
+              "OTHER"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation"
+        ],
+        "type": "object"
+      },
+      "bookingRequest": {
+        "description": "A booking requested by the MP",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/customer"
+          },
+          "id": {
+            "description": "A unique identifier for the TO to know this booking by",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "bookingState": {
+        "description": "The life-cycle state of the booking (from NEW to FINISHED)",
+        "enum": [
+          "NEW",
+          "REJECTED",
+          "EXPIRED",
+          "CONFIRMED",
+          "STARTED",
+          "FINISHED"
+        ],
+        "example": "CONFIRMED",
+        "type": "string"
+      },
+      "bookingStep": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/information"
+          },
+          {
+            "properties": {
+              "action": {
+                "description": "The possible steps are described here<br> `PENDING` - to show whenever the booking is in PENDING state (not confirmed)<br> `WAITING` - to indicate that the TO is processing the booking, optionally after an extension of the expiry time<br> `WAITING_FOR_PAYMENT` - to indicate that the payment hasn't been settled, after an extension of the expiry time with reason payment<br> `CONFIRMED` - to show whenever the booking is in a COMMITTED state (confirmed)<br> `CANCELLED` - to show whenever the booking is cancelled<br> `CONDITIONAL_CONFIRMED` - to show whenever the booking is conditionally confirmed (see process identifiers)<br> `EXPIRED` - to show whenever the booking is expired (the expiry time has passed)<br>",
+                "enum": [
+                  "PENDING",
+                  "WAITING_FOR_PAYMENT",
+                  "CONFIRMED",
+                  "CONDITIONAL_CONFIRMED",
+                  "CANCELLED",
+                  "EXPIRED"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "card": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/cardType"
+          },
+          {
+            "properties": {
+              "cardAdditionalNumber": {
+                "description": "additional number, like CVC code or IBAN code",
+                "type": "string"
+              },
+              "cardDescription": {
+                "description": "description of the card",
+                "type": "string"
+              },
+              "cardNumber": {
+                "description": "number of the card, like ID number, credit card or bank account number",
+                "type": "string"
+              },
+              "country": {
+                "$ref": "#/components/schemas/country"
+              },
+              "validUntil": {
+                "format": "date",
+                "type": "string"
+              }
+            },
+            "required": [
+              "cardNumber",
+              "validUntil"
+            ],
+            "type": "object"
+          }
+        ],
+        "description": "Any kind of card that isn't a license, only provide the cards that are required"
+      },
+      "cardType": {
+        "description": "A generic description of a card, asset class and acceptors is only allowed for DISCOUNT/TRAVEL/OTHER cards",
+        "properties": {
+          "acceptors": {
+            "description": "references to accepting parties, only if applicable",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "assetClass": {
+            "$ref": "#/components/schemas/assetClass"
+          },
+          "subType": {
+            "description": "For use in case of OTHER. Can be used in bilateral agreements.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The broad category of card",
+            "enum": [
+              "ID",
+              "DISCOUNT",
+              "TRAVEL",
+              "BANK",
+              "CREDIT",
+              "PASSPORT",
+              "OTHER"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "condition": {
+        "properties": {
+          "conditionType": {
+            "description": "The specific subclass of condition, should match the schema name exactly",
+            "type": "string"
+          },
+          "id": {
+            "description": "An identifier for this condition that can be used to refer to this condition",
+            "example": "deposit50eu",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conditionType"
+        ]
+      },
+      "conditionDeposit": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          },
+          {
+            "$ref": "#/components/schemas/amountOfMoney"
+          }
+        ],
+        "description": "in case the TO demands a deposit before usage. Requesting and refunding should be done using the /payment/claim-extra-costs endpoint."
+      },
+      "conditionPayWhenFinished": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          }
+        ],
+        "description": "in case the TO demands a direct payment after usage."
+      },
+      "conditionPostponedCommit": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          },
+          {
+            "properties": {
+              "ultimateResponseTime": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "ultimateResponseTime"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "conditionRequireBookingData": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          },
+          {
+            "properties": {
+              "claims": {
+                "description": "when in the 'requiredFields' array 'BLOCKCHAIN_CLAIMS' is specified, in this array claims can be specified. On the WIKI page, the known ones are enlisted, but this list isn't finalized yet. https://github.com/TOMP-WG/TOMP-API/wiki/Blockchain---Verifiable-credentials",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "requiredFields": {
+                "items": {
+                  "enum": [
+                    "FROM_ADDRESS",
+                    "TO_ADDRESS",
+                    "BIRTHDATE",
+                    "EMAIL",
+                    "PERSONAL_ADDRESS",
+                    "PHONE_NUMBERS",
+                    "LICENSES",
+                    "BANK_CARDS",
+                    "DISCOUNT_CARDS",
+                    "TRAVEL_CARDS",
+                    "ID_CARDS",
+                    "CREDIT_CARDS",
+                    "NAME",
+                    "AGE",
+                    "BLOCKCHAIN_CLAIMS"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "requiredFields"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "conditionRequireEvidence": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          },
+          {
+            "properties": {
+              "evidenceTypes": {
+                "items": {
+                  "enum": [
+                    "PARKED",
+                    "HELMET_IN_BASKET",
+                    "CHARGING"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "evidenceTypes"
+            ],
+            "type": "object"
+          }
+        ],
+        "deprecated": true,
+        "description": "use this condition to specify the evidence you require as TO in the off-boarding process. It can be used in addition with the static process identifier 'OFF_BOARDING_REQUIRED'. The evidence should be delivered in the /legs/{id}/events object (legEvent), in the `url` array This construct is deprecated since v1.5. Please migrate it to conditionRequireOffboardingSteps"
+      },
+      "conditionRequireOffboardingSteps": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          },
+          {
+            "properties": {
+              "steps": {
+                "items": {
+                  "$ref": "#/components/schemas/offBoardingStep"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "steps"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "conditionRequireOnboardingSteps": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          },
+          {
+            "properties": {
+              "steps": {
+                "items": {
+                  "$ref": "#/components/schemas/onBoardingStep"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "steps"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "conditionRequirePausingSteps": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          },
+          {
+            "properties": {
+              "steps": {
+                "items": {
+                  "$ref": "#/components/schemas/pausingStep"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "steps"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "conditionRequireResumingSteps": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          },
+          {
+            "properties": {
+              "steps": {
+                "items": {
+                  "$ref": "#/components/schemas/resumingStep"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "steps"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "conditionReturnArea": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          },
+          {
+            "properties": {
+              "coordinates": {
+                "$ref": "#/components/schemas/coordinates"
+              },
+              "returnArea": {
+                "$ref": "#/components/schemas/geojsonPolygon"
+              },
+              "returnHours": {
+                "description": "the return hours of the facility (if different from operating-hours)",
+                "items": {
+                  "$ref": "#/components/schemas/systemHours"
+                },
+                "type": "array"
+              },
+              "stationId": {
+                "description": "station to which the asset should be returned",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "description": "a return area. In the condition list there can be multiple return area's."
+      },
+      "conditionUpfrontPayment": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/condition"
+          }
+        ],
+        "description": "in case the TO demands a upfront payment before usage. The payment should be made in the booking phase."
+      },
+      "confirmationRequest": {
+        "description": "the TO can ask permission to do something to the MP, as the MP is financially responsible.",
+        "properties": {
+          "assetTypeId": {
+            "description": "reference to the assetType in /operator/available-assets, this property can be set when replacing an asset (for another type). In case of a successful replacement, the /legs/{id}/events - ASSIGN_ASSET should be send to the MP to inform a change of asset has been made.",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "REPLACE_ASSET",
+              "START_LEG"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "connectedLegInfo": {
+        "description": "this object describes the previous leg. It can contain f.x. a flight number, a used parking to get a discount, etc.",
+        "properties": {
+          "assetReference": {
+            "description": "the identification of the previous asset, like a flight number. This field (in case of a specific asset) or assetTypeReference must be filled.",
+            "type": "string"
+          },
+          "assetTypeReference": {
+            "description": "the identification of the previous asset type, like a discount combi. This field (in case of a specific asset type) or asset reference must be filled.",
+            "type": "string"
+          },
+          "provider": {
+            "description": "the provider of the previous leg (usually a Transport Operator reference)",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "coordinates": {
+        "description": "a lon, lat (WGS84, EPSG:4326)",
+        "properties": {
+          "lat": {
+            "example": 52.253279,
+            "format": "float",
+            "minimum": 0,
+            "type": "number"
+          },
+          "lng": {
+            "example": 6.169639,
+            "format": "float",
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "type": "object"
+      },
+      "country": {
+        "description": "two-letter country codes according to ISO 3166-1",
+        "example": "DE",
+        "maxLength": 2,
+        "minLength": 2,
+        "type": "string"
+      },
+      "customer": {
+        "allOf": [
+          {
+            "properties": {
+              "id": {
+                "description": "The identifier MaaS uses to identify the customer",
+                "example": "A0-123456",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "type": "object"
+          }
+        ],
+        "description": "A MaaS user that wishes to make a booking, only use the fields required by booking conditions"
+      },
+      "damage": {
+        "description": "A damage of the vehicle.",
+        "properties": {
+          "description": {
+            "description": "Description of the damage.",
+            "type": "string"
+          },
+          "pictures": {
+            "description": "URL where pictures of the damage can be accessed. Any special characters in the URL must be correctly escaped.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "vehicleComponent": {
+            "description": "Part/Component of the vehicle affected. If OTHER is specified the description needs to provide more detail as to what part/component is affected.",
+            "enum": [
+              "FRONT",
+              "REAR",
+              "LEFT",
+              "RIGHT",
+              "TOP",
+              "BOTTOM",
+              "INTERIOR",
+              "TIRE",
+              "ANCILLARY",
+              "OTHER"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "vehicleComponent",
+          "description"
+        ],
+        "type": "object"
+      },
+      "day": {
+        "enum": [
+          "MON",
+          "TUE",
+          "WED",
+          "THU",
+          "FRI",
+          "SAT",
+          "SUN"
+        ],
+        "type": "string"
+      },
+      "distance": {
+        "description": "The estimated distance travelled in the leg (in meters)",
+        "example": 7250,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "duration": {
+        "description": "A duration of some time (relative to a time) in milliseconds",
+        "example": 11112,
+        "maximum": 2147483647,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "endpoint": {
+        "description": "a formal description of an endpoint.",
+        "properties": {
+          "eventType": {
+            "description": "in case the path is ending in /events, the event type/operator enum should be added here.",
+            "enum": [
+              "PREPARE",
+              "ASSIGN_ASSET",
+              "SET_IN_USE",
+              "PAUSE",
+              "OPEN_TRUNK",
+              "START_FINISHING",
+              "FINISH",
+              "ISSUE",
+              "CANCEL",
+              "EXPIRE",
+              "DENY",
+              "COMMIT"
+            ],
+            "type": "string"
+          },
+          "externalType": {
+            "description": "this field must be used when addressing other standards for exchanging 'static' data (Level 1 MaaS)",
+            "enum": [
+              "GBFS",
+              "GTFS",
+              "NeTEx",
+              "OSDM_Offline",
+              "IXSI5",
+              "APDS"
+            ],
+            "type": "string"
+          },
+          "maxPageSize": {
+            "description": "the maximum size of the pages (only valid when supportsPaging=true). If the limit-parameter of the request is above this amount, a http code 400 will be returned.",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "method": {
+            "enum": [
+              "POST",
+              "PUT",
+              "GET",
+              "DELETE",
+              "PATCH"
+            ],
+            "type": "string"
+          },
+          "path": {
+            "description": "the exact path of the endpoint, starting after the base URL",
+            "example": "/plannings/",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "NOT_IMPLEMENTED",
+              "DIALECT",
+              "IMPLEMENTED"
+            ],
+            "type": "string"
+          },
+          "supportsPaging": {
+            "default": false,
+            "description": "does this endpoint support paging? In that case this endpoint can be accessed using query parameters offset=x and limit=y. Only allowed at endpoints that have specified these query parameters.",
+            "type": "boolean"
+          },
+          "useAssetTypes": {
+            "items": {
+              "description": "field references in external sources that are used in the booking process. E.g. when using vehicle types from GBFS, a value of 'vehicle_type_id' should be specified to book a bike from the particular vehicle type in the field 'useAssetTypes' in the offer request.",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "useAssets": {
+            "items": {
+              "description": "field references in external sources that are used in the booking process. E.g. when using vehicle types from GBFS, a value of 'vehicle_id' should be specified to book a bike from the particular vehicle type in the field 'useAssets' in the offer request.",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "method",
+          "path",
+          "status"
+        ],
+        "type": "object"
+      },
+      "endpointImplementation": {
+        "description": "a complete endpoint description, containing all endpoints, their status, but also the served scenarios and implemented process flows. The identifiers for the process flows can be found at https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers<br>",
+        "properties": {
+          "baseUrl": {
+            "type": "string"
+          },
+          "endpoints": {
+            "items": {
+              "$ref": "#/components/schemas/endpoint"
+            },
+            "type": "array"
+          },
+          "processIdentifiers": {
+            "$ref": "#/components/schemas/processIdentifiers"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/scenario"
+            },
+            "type": "array"
+          },
+          "steps": {
+            "description": "The steps can be specified here, when they are uniform over all assets. If some assets should be handled differently, it can be specified as a condition in the booking for that specific asset(type).",
+            "properties": {
+              "booking": {
+                "items": {
+                  "$ref": "#/components/schemas/bookingStep"
+                },
+                "type": "array"
+              },
+              "offboarding": {
+                "description": "this array should be considered as a sequence!",
+                "items": {
+                  "$ref": "#/components/schemas/offBoardingStep"
+                },
+                "type": "array"
+              },
+              "onboarding": {
+                "description": "this array should be considered as a sequence!",
+                "items": {
+                  "$ref": "#/components/schemas/onBoardingStep"
+                },
+                "type": "array"
+              },
+              "pausing": {
+                "description": "this array should be considered as a sequence!",
+                "items": {
+                  "$ref": "#/components/schemas/pausingStep"
+                },
+                "type": "array"
+              },
+              "planning": {
+                "items": {
+                  "$ref": "#/components/schemas/planningStep"
+                },
+                "type": "array"
+              },
+              "resuming": {
+                "description": "this array should be considered as a sequence!",
+                "items": {
+                  "$ref": "#/components/schemas/resumingStep"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "baseUrl",
+          "endpoints",
+          "scenarios",
+          "processIdentifiers"
+        ],
+        "type": "object"
+      },
+      "error": {
+        "description": "An error that the service may send, e.g. in case of invalid input, missing authorization or internal service error. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.",
+        "properties": {
+          "detail": {
+            "description": "A human-readable explanation specific to this occurrence of the problem, could match Content-Language",
+            "type": "string"
+          },
+          "errorcode": {
+            "description": "The TOMP specific error code. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for more details of this error.",
+            "type": "integer"
+          },
+          "instance": {
+            "description": "A URI reference that identifies the specific occurrence of the problem.  It may or may not yield further information if dereferenced.",
+            "type": "string"
+          },
+          "status": {
+            "description": "The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.",
+            "type": "integer"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the problem type.  It SHOULD NOT change from occurrence to occurrence of the problem, except to match Content-Language",
+            "type": "string"
+          },
+          "type": {
+            "description": "The category of this type of error.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "extraCosts": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/amountOfMoney"
+          },
+          {
+            "properties": {
+              "category": {
+                "$ref": "#/components/schemas/journalCategory"
+              },
+              "description": {
+                "description": "free text to describe the extra costs. Mandatory in case of 'OTHER', should match Content-Language",
+                "type": "string"
+              },
+              "meta": {
+                "additionalProperties": true,
+                "description": "Arbitrary metadata that a TO can add, like voucher codes",
+                "type": "object"
+              },
+              "number": {
+                "description": "e.g. number of litres, number of kilowatthour, etc",
+                "minimum": 0,
+                "type": "number"
+              },
+              "numberType": {
+                "enum": [
+                  "LITER",
+                  "KILOWATTHOUR",
+                  "CO2_COMPENSATION",
+                  "OTHER"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "category",
+              "description",
+              "amount"
+            ],
+            "type": "object"
+          }
+        ],
+        "description": "Costs that the TO is charging the MP; credits are negative. Other amounts should be positive"
+      },
+      "fare": {
+        "description": "the total fare is the sum of all parts, except for the 'MAX' farePart. This one describes the maximum price for the complete leg.",
+        "properties": {
+          "class": {
+            "description": "in the future we'll set up an enumeration of possible \"fare classes\". For now it's free format.",
+            "type": "string"
+          },
+          "description": {
+            "description": "user friendly description of the fare (e.g. 'full fare'), should match Content-Language",
+            "type": "string"
+          },
+          "estimated": {
+            "description": "is this fare an estimation?",
+            "type": "boolean"
+          },
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/farePart"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "estimated",
+          "parts"
+        ]
+      },
+      "farePart": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/amountOfMoney"
+          },
+          {
+            "properties": {
+              "assetState": {
+                "default": "IN_USE",
+                "description": "in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE",
+                "enum": [
+                  "IN_USE",
+                  "PAUSED"
+                ],
+                "type": "string"
+              },
+              "class": {
+                "default": "FARE",
+                "description": "class of this fare part. Could be FARE or ANCILLARY",
+                "enum": [
+                  "FARE",
+                  "ANCILLARY"
+                ],
+                "type": "string"
+              },
+              "kind": {
+                "description": "is this the default price or is this an additional part (discount, price surge). In case of a DISCOUNT, the amount must always be negative and in case of SURGE it must be positive. This also means, that when you're working with discounts or surges, you have to deliver 2 fareparts, one for the default price and one for the discount/surge. This can be used in combination with as well the fixed price parts as with the flex price parts.",
+                "enum": [
+                  "DEFAULT",
+                  "DISCOUNT",
+                  "SURGE"
+                ],
+                "type": "string"
+              },
+              "maximumAmount": {
+                "description": "The minimum price, in the same currency as amount. Place in `amount` the most likely value.",
+                "example": 11,
+                "minimum": 0,
+                "type": "number"
+              },
+              "meta": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "minimumAmount": {
+                "description": "The minimum price, in the same currency as amount. Place in `amount` the most likely value.",
+                "example": 9,
+                "minimum": 0,
+                "type": "number"
+              },
+              "name": {
+                "description": "an optional description of this fare part.",
+                "type": "string"
+              },
+              "scaleFrom": {
+                "description": "in case of scaling, this is the bottom value (f.x. in the first hour 3 CAD, the `scaleFrom` should contain 0 and the `scaleType` HOUR). When `scaleTo` is used, but this field is missing, it should be assumed it is a 0.",
+                "minimum": 0,
+                "type": "number"
+              },
+              "scaleTo": {
+                "description": "the upper value of the scale (f.x. 3 CAD in the first hour, this field should contain 1, `scaleFrom` 0 and `scaleType` HOUR)",
+                "minimum": 0,
+                "type": "number"
+              },
+              "scaleType": {
+                "enum": [
+                  "KM",
+                  "MILE",
+                  "HOUR",
+                  "MINUTE"
+                ],
+                "type": "string"
+              },
+              "type": {
+                "description": "type of fare part. If there is only one farepart and this field is missing, it should be assumed it is 'FIXED'. In all other situations this field is mandatory.",
+                "enum": [
+                  "FIXED",
+                  "FLEX",
+                  "MAX"
+                ],
+                "type": "string"
+              },
+              "unitType": {
+                "description": "in case of 'FLEX' mandatory, otherwise not allowed. E.g. 0.5 EUR per HOUR",
+                "enum": [
+                  "KM",
+                  "SECOND",
+                  "MINUTE",
+                  "HOUR",
+                  "MILE",
+                  "PERCENTAGE"
+                ],
+                "type": "string"
+              },
+              "units": {
+                "description": "the number of km, seconds etc. Mandatory when the type is 'FLEX', otherwise not allowed. In case of 0.5 EUR per 15 MINUTES, `units` should contain 15 and `unitType` MINUTES.",
+                "format": "float",
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "required": [
+              "amount"
+            ],
+            "type": "object"
+          }
+        ],
+        "description": "this describes a part of the fare (or discount). It contains a for instance the startup costs (fixed) or the flex part (e.g. 1.25 EUR per 2.0 MILES). The amount is tax included. In case of discounts, the values are negative. With 'MAX' you can specify e.g. a maximum of 15 euro per day. Percentage is mainly added for discounts. The `scale` properties create the ability to communicate scales (e.g. the first 4 kilometers you've to pay EUR 0.35 per kilometer, the kilometers 4 until 8 EUR 0.50 and above it EUR 0.80 per kilometer)."
+      },
+      "geojsonGeometry": {
+        "description": "geoJSON geometry",
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "properties": {
+          "coordinates": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/geojsonPoint"
+              },
+              {
+                "$ref": "#/components/schemas/geojsonLine"
+              },
+              {
+                "$ref": "#/components/schemas/geojsonPolygon"
+              },
+              {
+                "$ref": "#/components/schemas/geojsonMultiPolygon"
+              }
+            ]
+          },
+          "type": {
+            "enum": [
+              "Point",
+              "LineString",
+              "Polygon",
+              "MultiPolygon"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "geojsonLine": {
+        "description": "An array  of WGS84 coordinate pairs",
+        "example": [
+          [
+            6.169639,
+            52.253279
+          ],
+          [
+            6.05623,
+            52.63473
+          ]
+        ],
+        "items": {
+          "$ref": "#/components/schemas/geojsonPoint"
+        },
+        "type": "array"
+      },
+      "geojsonMultiPolygon": {
+        "description": "geojson representation of a multi polygon. See also https://geojson.org/geojson-spec.html#multipolygon",
+        "example": [
+          [
+            [
+              [
+                1,
+                1
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          ]
+        ],
+        "items": {
+          "$ref": "#/components/schemas/geojsonPolygon"
+        },
+        "type": "array"
+      },
+      "geojsonPoint": {
+        "description": "Geojson Coordinate",
+        "example": [
+          4.53432,
+          55.324523
+        ],
+        "items": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "maxItems": 2,
+        "minItems": 2,
+        "type": "array"
+      },
+      "geojsonPolygon": {
+        "description": "geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.",
+        "example": [
+          [
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        ],
+        "items": {
+          "$ref": "#/components/schemas/geojsonLine"
+        },
+        "type": "array"
+      },
+      "information": {
+        "description": "Information provided to end users",
+        "properties": {
+          "goal": {
+            "description": "the purpose of the information",
+            "enum": [
+              "INSTRUCTIONS",
+              "SALES"
+            ],
+            "type": "string"
+          },
+          "showTime": {
+            "deprecated": true,
+            "description": "the moment when the information must be displayed",
+            "enum": [
+              "PLANNING",
+              "COMMITTED_BOOKING",
+              "PREPARE",
+              "SET_IN_USE",
+              "PAUSE",
+              "OPEN_TRUNK",
+              "START_FINISHING",
+              "FINISH"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "description": "free format text or HTML, depending on the type. Not to use in combination with `URL` or `IMAGE`",
+            "type": "string"
+          },
+          "type": {
+            "description": "the type of the information provided",
+            "enum": [
+              "URL",
+              "IMAGE",
+              "PLAIN_TEXT",
+              "HTML"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "description": "the internet location of the information, used in case or type `URL` or `IMAGE`",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "journalCategory": {
+        "description": "They are there for filtering purposes in the journal entry endpoint.",
+        "enum": [
+          "ALL",
+          "DAMAGE",
+          "LOSS",
+          "STOLEN",
+          "EXTRA_USAGE",
+          "REFUND",
+          "FINE",
+          "OTHER_ASSET_USED",
+          "CREDIT",
+          "VOUCHER",
+          "DEPOSIT",
+          "OTHER",
+          "FARE"
+        ],
+        "type": "string"
+      },
+      "journalState": {
+        "enum": [
+          "TO_INVOICE",
+          "INVOICED"
+        ],
+        "type": "string"
+      },
+      "leg": {
+        "description": "A planned (segment of) a booked trip using one asset type",
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/place"
+          },
+          "id": {
+            "description": "The unique identifier (TO) of this leg",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/legState"
+          },
+          "to": {
+            "$ref": "#/components/schemas/place"
+          }
+        },
+        "required": [
+          "from",
+          "assetType"
+        ],
+        "type": "object"
+      },
+      "legEvent": {
+        "description": "event for the execution",
+        "properties": {
+          "asset": {
+            "$ref": "#/components/schemas/legEventAsset"
+          },
+          "event": {
+            "enum": [
+              "SET_IN_USE",
+              "PAUSE FINISH"
+            ],
+            "type": "string"
+          },
+          "time": {
+            "example": "2011-12-03T10:15:30+01:00",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "time",
+          "event"
+        ],
+        "type": "object"
+      },
+      "legEventAsset": {
+        "description": "event for the execution",
+        "properties": {
+          "overriddenProperties": {
+            "$ref": "#/components/schemas/assetProperties"
+          }
+        },
+        "required": [
+          "overriddenProperties"
+        ],
+        "type": "object"
+      },
+      "legEventAssetProperties": {
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/place"
+          }
+        }
+      },
+      "legProgress": {
+        "description": "provides current asset location & duration and distance of the current leg",
+        "properties": {
+          "asset": {
+            "$ref": "#/components/schemas/asset"
+          },
+          "coordinates": {
+            "$ref": "#/components/schemas/coordinates"
+          },
+          "distance": {
+            "$ref": "#/components/schemas/distance"
+          },
+          "duration": {
+            "$ref": "#/components/schemas/duration"
+          }
+        },
+        "required": [
+          "coordinates"
+        ],
+        "type": "object"
+      },
+      "legState": {
+        "description": "status of a leg",
+        "enum": [
+          "NOT_STARTED",
+          "IN_USE",
+          "PAUSED",
+          "FINISHED",
+          "CANCELLED"
+        ],
+        "type": "string"
+      },
+      "license": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/licenseType"
+          },
+          {
+            "properties": {
+              "licenseCode": {
+                "description": "in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the assetType too generic.",
+                "example": "D4",
+                "type": "string"
+              },
+              "number": {
+                "example": "1287948792",
+                "type": "string"
+              },
+              "validUntil": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "description": "driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)"
+      },
+      "licenseType": {
+        "description": "A category of license to use a certain asset class",
+        "properties": {
+          "assetClass": {
+            "$ref": "#/components/schemas/assetClass"
+          },
+          "issuingCountry": {
+            "$ref": "#/components/schemas/country"
+          }
+        },
+        "required": [
+          "assetClass"
+        ],
+        "type": "object"
+      },
+      "notification": {
+        "description": "notifies the MaaS operator of issues with a booking. Asset information can be provided when needed.",
+        "properties": {
+          "asset": {
+            "$ref": "#/components/schemas/asset"
+          },
+          "comment": {
+            "description": "free text, should match Content-Language",
+            "type": "string"
+          },
+          "legId": {
+            "description": "whenever the booking contains multiple legs, this field is mandatory and contain the id of the leg related to the notification.",
+            "type": "string"
+          },
+          "minutes": {
+            "description": "in case of ETA, the number of minutes until arrival at the pickup location",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": {
+            "enum": [
+              "VEHICLE_NOT_AVAILABLE",
+              "USER_NO_SHOW",
+              "ETA",
+              "MESSAGE_TO_DRIVER",
+              "MESSAGE_TO_END_USER",
+              "USER_OUT_OF_LIMITS",
+              "OTHER"
+            ],
+            "example": "VEHICLE_NOT_AVAILABLE",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "offBoardingStep": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/information"
+          },
+          {
+            "properties": {
+              "action": {
+                "description": "these actions are available<br> `SEND_START_FINISHING` - the TO needs to be informed the leg is about to finish<br> `PARK_ASSIST` - user action to park (stop) using the asset<br> `UNLOCK_LOCKER` - user action, could be triggered by the START_FINISH event<br> `CONNECT_CHARGER` - user action<br> `LOCK_ASSET` - user action, could be triggered by the FINISH event<br> `SEND_OPEN_TRUNK` - the TO opens the trunk remotely <br> `UNLOCK_TRUNK` - user action <br> `STOW_HELMET` - user action <br> `LOCK_TRUNK` - user action <br> `LOCK_LOCKER` - user action <br> `SEND_FINISH` - the TO wants to be informed about the end of the leg<br> `SEND_EVIDENCE_PARKED` - the TO requires parking evidence<br> `SEND_EVIDENCE_HELMET` - the TO requires evidence of storing the helmet<br> `SEND_EVIDENCE_CHARGER` - the TO requires evidence of correct usage of the charger",
+                "enum": [
+                  "SEND_START_FINISHING",
+                  "PARK_ASSIST",
+                  "UNLOCK_LOCKER",
+                  "CONNECT_CHARGER",
+                  "LOCK_ASSET",
+                  "SEND_OPEN_TRUNK",
+                  "UNLOCK_TRUNK",
+                  "STOW_HELMET",
+                  "LOCK_TRUNK",
+                  "LOCK_LOCKER",
+                  "SEND_FINISH",
+                  "SEND_EVIDENCE_PARKED",
+                  "SEND_EVIDENCE_HELMET",
+                  "SEND_EVIDENCE_CHARGER"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "onBoardingStep": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/information"
+          },
+          {
+            "properties": {
+              "action": {
+                "description": "The possible steps are described here<br> `SEND_PREPARE` - indicate the leg is going to start <br> `UNLOCK_LOCKER` - user action - optionally triggered by the PREPARE event<br> `DISCONNECT_CHARGER` - requested user action <br> `SHOW_DAMAGES` - show known damages to end user <br> `UNLOCK_ASSET` - requested user action or triggered by SET_IN_USE event <br> `START_ASSET` - requested user action <br> `SEND_OPEN_TRUNK` - request TO to open trunk/helmet case remotely<br> `UNLOCK_TRUNK` - requested user action <br> `TAKE_HELMET` - requested user action <br> `SEND_SET_IN_USE` - request to start leg <br> `SEND_ASSIGN_ASSET` - request to assign the specified asset to the leg <br> `LOCK_LOCKER` - requested user action",
+                "enum": [
+                  "SEND_PREPARE",
+                  "UNLOCK_LOCKER",
+                  "DISCONNECT_CHARGER",
+                  "SHOW_DAMAGES",
+                  "UNLOCK_ASSET",
+                  "START_ASSET",
+                  "SEND_OPEN_TRUNK",
+                  "UNLOCK_TRUNK",
+                  "TAKE_HELMET",
+                  "SEND_SET_IN_USE",
+                  "SEND_ASSIGN_ASSET",
+                  "LOCK_LOCKER"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "oneStopBookingRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/planningRequest"
+          },
+          {
+            "properties": {
+              "customer": {
+                "$ref": "#/components/schemas/customer"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "pausingStep": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/information"
+          },
+          {
+            "properties": {
+              "action": {
+                "description": "allowed actions<br> `SEND_PAUSE` - send leg event PAUSE to inform the TO<br> `PARK_ASSIST` - user action, the end user can be informed how and where to park<br> `LOCK_ASSET` - user action, can be triggered by the PAUSE event<br> `SEND_OPEN_TRUNK` - request TO to open the trunk remotely<br> `UNLOCK_TRUNK` - user action<br> `STOW_HELMET` - user action<br> `LOCK_TRUNK` - user action",
+                "enum": [
+                  "SEND_PAUSE",
+                  "PARK_ASSIST",
+                  "LOCK_ASSET",
+                  "SEND_OPEN_TRUNK",
+                  "UNLOCK_TRUNK",
+                  "STOW_HELMET",
+                  "LOCK_TRUNK"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "phone": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "LANDLINE",
+              "MOBILE"
+            ],
+            "type": "string"
+          },
+          "number": {
+            "description": "phone number. In case of international usage, always provide the country code.",
+            "example": "+49-3048934758",
+            "pattern": "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\.0-9]*$",
+            "type": "string"
+          },
+          "preferred": {
+            "description": "only one phone in this array can have a true in this property",
+            "type": "boolean"
+          },
+          "type": {
+            "enum": [
+              "PRIVATE",
+              "BUSINESS",
+              "OTHER"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "place": {
+        "description": "a origin or destination of a leg, 3D. lon/lat in WGS84.",
+        "properties": {
+          "coordinates": {
+            "$ref": "#/components/schemas/coordinates"
+          }
+        },
+        "required": [
+          "coordinates"
+        ],
+        "type": "object"
+      },
+      "planning": {
+        "description": "A travel planning with bookable options that fulfil the constraints of the planning",
+        "properties": {
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/booking"
+            },
+            "type": "array"
+          },
+          "validUntil": {
+            "description": "The time until which the presented options are (likely) available",
+            "type": "string"
+          }
+        },
+        "required": [
+          "validUntil",
+          "options"
+        ],
+        "type": "object"
+      },
+      "planningRequest": {
+        "description": "A travel planning for which bookable options are requested",
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/place"
+          },
+          "useAssets": {
+            "description": "The specific asset(s) the user wishes to receive leg options for",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "from"
+        ],
+        "type": "object"
+      },
+      "planningStep": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/information"
+          },
+          {
+            "properties": {
+              "action": {
+                "description": "the `RESULT_SHOWN` action requires the MP to display some information to the customer when it is viewing the proposed legs.",
+                "enum": [
+                  "RESULT_SHOWN"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "description": "this action allows to publish advertisements together with the proposed leg.",
+        "type": "object"
+      },
+      "processIdentifiers": {
+        "properties": {
+          "booking": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "general": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "operatorInformation": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "payment": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "planning": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "support": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "tripExecution": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "operatorInformation",
+          "planning",
+          "booking",
+          "tripExecution",
+          "support",
+          "payment",
+          "general"
+        ],
+        "type": "object"
+      },
+      "registrationOperation": {
+        "description": "describes a customer to be registered",
+        "properties": {
+          "firstName": {
+            "description": "firstname of the customer",
+            "example": "Max",
+            "type": "string"
+          },
+          "lastName": {
+            "description": "lastname of the customer",
+            "example": "Mustermann",
+            "type": "string"
+          },
+          "maasCustomerId": {
+            "description": "id of the customer within the MP platform",
+            "example": "98765-4321-0",
+            "type": "string"
+          },
+          "mail": {
+            "description": "email of the customer",
+            "example": "mail@customermail.de",
+            "type": "string"
+          },
+          "mobile": {
+            "description": "The mobile number of the person. (Pattern ^+[0-9]+$)",
+            "example": "+4915137492450",
+            "type": "string"
+          },
+          "planId": {
+            "description": "id of the tariff the customer has chosen",
+            "example": "1008423",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "mail",
+          "mobile",
+          "planId",
+          "firstName",
+          "lastName",
+          "maasCustomerId"
+        ],
+        "type": "object"
+      },
+      "requirement": {
+        "description": "describes an (dis)ability or ancillary.",
+        "properties": {
+          "applicable-days": {
+            "description": "days of week that are applicable",
+            "items": {
+              "enum": [
+                "MO",
+                "TU",
+                "WE",
+                "TH",
+                "FR",
+                "SA",
+                "SU"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "category": {
+            "description": "references to the first column of the specification initial values [ HR, AV, HV, AB, AER, K, ZR, RR ]",
+            "type": "string"
+          },
+          "memo": {
+            "description": "extra field for detailed information, not standardized",
+            "type": "string"
+          },
+          "number": {
+            "description": "references to the second column of the specification",
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string"
+          },
+          "source": {
+            "description": "if obsolete, it is referencing the travelers' dictionary (https://github.com/TOMP-WG/TOMP-API/blob/master/documents/CROW%20passenger%20characteristics.xlsx)",
+            "type": "string"
+          },
+          "type": {
+            "description": "conditionally extra information, referencing to the 3th column",
+            "type": "string"
+          },
+          "variable-number": {
+            "description": "in some requirements there is references to '[variable number]' e.g. of meters (like ZR06)",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "category",
+          "number"
+        ],
+        "type": "object"
+      },
+      "requirements": {
+        "additionalProperties": true,
+        "description": "Requirements from the end user side.",
+        "properties": {
+          "abilities": {
+            "items": {
+              "$ref": "#/components/schemas/requirement"
+            },
+            "type": "array"
+          },
+          "bringAlong": {
+            "items": {
+              "$ref": "#/components/schemas/requirement"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "resumingStep": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/information"
+          },
+          {
+            "properties": {
+              "action": {
+                "description": "possible values<br> `UNLOCK_ASSET` - user action, could be triggered by SET_IN_USE event<br> `SEND_OPEN_TRUNK` - request TO to open trunk remotely<br> `UNLOCK_TRUNK` - user action<br> `TAKE_HELMET` - user action<br> `LOCK_TRUNK` - user action<br> `START_ASSET` - user action<br> `SEND_SET_IN_USE` - the TO wants to be informed that the leg is resumed. Optionally triggers the unlock of the vehicle",
+                "enum": [
+                  "UNLOCK_ASSET",
+                  "SEND_OPEN_TRUNK",
+                  "UNLOCK_TRUNK",
+                  "TAKE_HELMET",
+                  "LOCK_TRUNK",
+                  "START_ASSET",
+                  "SEND_SET_IN_USE"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "scenario": {
+        "enum": [
+          "POSTPONED_COMMIT",
+          "DEPOSIT",
+          "PAY_WHEN_FINISHED",
+          "REQUIRE_BOOKING_DATA",
+          "RETURN_AREA",
+          "UPFRONT_PAYMENT"
+        ],
+        "type": "string"
+      },
+      "stationInformation": {
+        "properties": {
+          "assetsAvailable": {
+            "description": "the number of available assets in this station (total)",
+            "type": "integer"
+          },
+          "capacity": {
+            "description": "the total capacity of this station",
+            "type": "integer"
+          },
+          "coordinates": {
+            "$ref": "#/components/schemas/coordinates"
+          },
+          "isInstalled": {
+            "description": "Is the station currently on the street?",
+            "type": "boolean"
+          },
+          "isRenting": {
+            "description": "Is the station currently renting vehicles?",
+            "type": "boolean"
+          },
+          "isReturning": {
+            "description": "Is the station accepting vehicle returns?",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "public name of the station, could match Content-Language",
+            "example": "Island Central",
+            "type": "string"
+          },
+          "physicalAddress": {
+            "$ref": "#/components/schemas/address"
+          },
+          "stationId": {
+            "description": "unique identifier of a station",
+            "example": "XX:Y:12345678",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stationId",
+          "name",
+          "coordinates"
+        ],
+        "type": "object"
+      },
+      "stopReference": {
+        "description": "reference to a stop (can be nation specific). This can help to specific pinpoint a (bus) stop. Extra information about the stop is not supplied; you should find it elsewhere.",
+        "properties": {
+          "country": {
+            "$ref": "#/components/schemas/country"
+          },
+          "id": {
+            "description": "this field should contain the complete ID. E.g. NL:S:13121110 or BE:S:79640040",
+            "type": "string"
+          },
+          "type": {
+            "description": "type of external reference (GTFS, CHB).",
+            "enum": [
+              "GTFS_STOP_ID",
+              "GTFS_STOP_CODE",
+              "GTFS_AREA_ID",
+              "CHB_STOP_PLACE_CODE",
+              "CHB_QUAY_CODE",
+              "NS_CODE"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "country"
+        ],
+        "type": "object"
+      },
+      "suboperator": {
+        "description": "The operator of a leg or asset, in case this is not the TO itself but should be shown to the user",
+        "properties": {
+          "contact": {
+            "description": "contact information, should match Content-Language",
+            "type": "string"
+          },
+          "description": {
+            "description": "short description of the operator, should match Content-Language",
+            "type": "string"
+          },
+          "maasId": {
+            "description": "the maasId from the operator",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the operator, could match Content-Language",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "supportRequest": {
+        "description": "request for support",
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "licensePlate": {
+            "description": "refers to the broken asset",
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/place"
+          },
+          "subType": {
+            "description": "describes the issue with the asset in more detail",
+            "enum": [
+              "TIRE_WHEEL",
+              "BIKE_STAND",
+              "PEDAL",
+              "GEARSHIFT",
+              "SADDLE",
+              "CARRIER",
+              "MUDGUARD",
+              "HANDLEBAR",
+              "BELL",
+              "LIGHT",
+              "BRAKE",
+              "DIRTY",
+              "DISPLAY",
+              "CHILD_SEAT",
+              "MOTOR",
+              "QR_CODE",
+              "LOCK_NOT_CLOSING",
+              "LOCK_NOT_WORKING",
+              "OTHER_ISSUE"
+            ],
+            "type": "string"
+          },
+          "supportType": {
+            "enum": [
+              "BROKEN_DOWN",
+              "NOT_AT_LOCATION",
+              "MISSING_AFTER_PAUSE",
+              "NOT_CLEAN",
+              "NOT_AVAILABLE",
+              "UNABLE_TO_OPEN",
+              "UNABLE_TO_CLOSE",
+              "API_TECHNICAL",
+              "API_FUNCTIONAL",
+              "ACCIDENT",
+              "OTHER"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "supportType",
+          "licensePlate",
+          "subType"
+        ],
+        "type": "object"
+      },
+      "supportStatus": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/supportRequest"
+          }
+        ],
+        "description": "the current status of support",
+        "type": "object"
+      },
+      "systemAlert": {
+        "properties": {
+          "alertId": {
+            "description": "a unique identifier for this alert",
+            "type": "string"
+          },
+          "alertType": {
+            "enum": [
+              "SYSTEM_CLOSURE",
+              "STATION_CLOSURE",
+              "STATION_MOVE",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "description": "Detailed text description of the alert, should match Content-Language",
+            "example": "station closed indefinitely due to vandalism",
+            "type": "string"
+          },
+          "lastUpdated": {
+            "type": "string"
+          },
+          "regionId": {
+            "description": "Array of strings - If this system has regions, and if this alert only affects certain regions, include their ids, otherwise, omit this field. If both stationIDs and regionIDs are omitted, assume this alert affects the entire system",
+            "example": [
+              "regionID0001"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "startAndEndTimes": {
+            "description": "Array of hashes with the keys \"start\" and \"end\" indicating when the alert is in effect (e.g. when the system or station is actually closed, or when it is scheduled to be moved). If this array is omitted then the alert should be displayed as long as it is in the feed.",
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "stationIds": {
+            "description": "Array of strings - If this is an alert that affects one or more stations, include their ids, otherwise omit this field. If both stationIDs and regionIDs are omitted, assume this alert affects the entire system",
+            "example": [
+              "stationID0001"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "summary": {
+            "description": "A short summary of this alert to be displayed to the customer, should match Content-Language",
+            "example": "station closed",
+            "type": "string"
+          },
+          "url": {
+            "description": "URL where the customer can learn more information about this alert, if there is one",
+            "example": "http://www.rentmyfreebike.com/alerts",
+            "type": "string"
+          }
+        },
+        "required": [
+          "alertId",
+          "alertType",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "systemCalendar": {
+        "properties": {
+          "endDay": {
+            "description": "Ending day for the system operations (1-31)",
+            "example": 31,
+            "maximum": 31,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "endMonth": {
+            "description": "Ending month for the system operations (1-12)",
+            "example": 12,
+            "maximum": 12,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "endYear": {
+            "description": "Ending year for the system operations",
+            "example": 2099,
+            "type": "integer"
+          },
+          "regionId": {
+            "description": "If this parameter is present, it means that start and end parameters correspond to the opening and closing days for the region. (GET /operator/regions)",
+            "type": "string"
+          },
+          "startDay": {
+            "description": "Starting day for the system operations (1-31)",
+            "example": 1,
+            "maximum": 31,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "startMonth": {
+            "description": "Starting month for the system operations (1-12)",
+            "example": 1,
+            "maximum": 12,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "startYear": {
+            "description": "Starting year for the system operations",
+            "example": 2019,
+            "type": "integer"
+          },
+          "stationId": {
+            "description": "If this parameter is present, it means that start and end parameters correspond to the opening and closing days of the station. (GET /operator/stations)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "startMonth",
+          "startDay",
+          "endMonth",
+          "endDay"
+        ],
+        "type": "object"
+      },
+      "systemHours": {
+        "properties": {
+          "days": {
+            "description": "An array of abbreviations (first 3 letters) of English names of the days of the week that this hour object applies to (i.e. [\"mon\", \"tue\"]). Each day can only appear once within all of the hours objects in this feed.",
+            "items": {
+              "$ref": "#/components/schemas/day"
+            },
+            "type": "array"
+          },
+          "endTime": {
+            "type": "string"
+          },
+          "regionId": {
+            "description": "If this parameter is present, it means that startTime and endTime correspond to the opening and closing hours for the region. (GET /operator/regions)",
+            "type": "string"
+          },
+          "startTime": {
+            "type": "string"
+          },
+          "stationId": {
+            "description": "If this parameter is present, it means that startTime and endTime correspond to the opening and closing hours of the station. (GET /operator/stations)",
+            "type": "string"
+          },
+          "userType": {
+            "description": "This indicates that this set of rental hours applies to either members or non-members only.",
+            "enum": [
+              "MEMBER",
+              "NON_MEMBERS"
+            ],
+            "example": "MEMBER",
+            "type": "string"
+          }
+        },
+        "required": [
+          "days",
+          "startTime",
+          "endTime"
+        ],
+        "type": "object"
+      },
+      "systemInformation": {
+        "properties": {
+          "assetClasses": {
+            "items": {
+              "$ref": "#/components/schemas/assetClass"
+            },
+            "type": "array"
+          },
+          "conditions": {
+            "description": "Added to include possibility to communicate general rental conditions like minimum age, max. reservation time etc. [amended]",
+            "type": "string"
+          },
+          "discoveryUriAndroid": {
+            "description": "Uri to detect if the app is available at the mobile.",
+            "type": "string"
+          },
+          "discoveryUriIOS": {
+            "description": "Uri to detect if the app is available at the mobile.",
+            "type": "string"
+          },
+          "email": {
+            "description": "A single contact email address for customers to address questions about the system",
+            "example": "rent@freebike.com",
+            "type": "string"
+          },
+          "feedContactEmail": {
+            "description": "A single contact email address for consumers of this feed to report technical issues.",
+            "type": "string"
+          },
+          "language": {
+            "description": "The languages supported by this operator for user-facing text. These can be requested using the Accept-Language header and should then be returned in Content-Language",
+            "items": {
+              "example": "fr-FR",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "licenseUrl": {
+            "description": "A fully qualified URL of a page that defines the license terms for the GBFS data for this system, as well as any other license terms the system would like to define (including the use of corporate trademarks, etc)",
+            "example": "https://www.rentmyfreebike.com/license",
+            "type": "string"
+          },
+          "name": {
+            "description": "Full name of the system to be displayed to customers, could match Content-Language",
+            "example": "FreeBike",
+            "type": "string"
+          },
+          "operator": {
+            "description": "Name of the operator of the system, could match Content-Language",
+            "example": "FreeBike",
+            "type": "string"
+          },
+          "phoneNumber": {
+            "description": "A single voice telephone number for the specified system. This field is a string value that presents the telephone number as typical for the system's service area. It can and should contain punctuation marks to group the digits of the number.",
+            "example": "555-12345",
+            "type": "string"
+          },
+          "productType": {
+            "description": "the type of product offered. SHARING should also be used for public transport.",
+            "enum": [
+              "RENTAL",
+              "SHARING",
+              "PARKING",
+              "CHARGING"
+            ],
+            "type": "string"
+          },
+          "purchaseUrl": {
+            "description": "A fully qualified URL where a customer can purchase a membership or learn more about purchasing memberships",
+            "example": "https://www.rentmyfreebike.com/purchase",
+            "type": "string"
+          },
+          "shortName": {
+            "description": "Optional abbreviation for a system",
+            "example": "FB",
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "storeUriAndroid": {
+            "description": "Uri to the app in the store.",
+            "example": "https://play.google.com/store/apps/details?id=com.rentmyfreebike.android",
+            "type": "string"
+          },
+          "storeUriIOS": {
+            "description": "Uri to the app in the store.",
+            "example": "itms-apps://itunes.apple.com/app/idcom.rentmyfreebike.ios",
+            "type": "string"
+          },
+          "systemId": {
+            "description": "identifier for this transport system. This should be globally unique (even between different systems)",
+            "example": "XXTO0001",
+            "type": "string"
+          },
+          "timezone": {
+            "description": "The time zone where the system is located. Time zone names never contain the space character but may contain an underscore. Please refer to the \"TZ\" value in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of valid values",
+            "example": "IST",
+            "type": "string"
+          },
+          "typeOfSystem": {
+            "description": "Describes the type of system",
+            "enum": [
+              "FREE_FLOATING",
+              "STATION_BASED",
+              "VIRTUAL_STATION_BASED"
+            ],
+            "example": "FREE_FLOATING",
+            "type": "string"
+          },
+          "url": {
+            "description": "The URL of the transport operator. The value must be a fully qualified URL that includes http:// or https://, and any special characters in the URL must be correctly escaped.",
+            "example": "https://www.rentmyfreebike.com",
+            "type": "string"
+          }
+        },
+        "required": [
+          "systemId",
+          "language",
+          "name",
+          "timezone",
+          "typeOfSystem"
+        ]
+      },
+      "systemPricingPlan": {
+        "properties": {
+          "description": {
+            "description": "Text field describing the particular pricing plan in human readable terms. This should include the duration, price, conditions, etc. that the publisher would like users to see. This is intended to be a human-readable description and should not be used for automatic calculations, should match Content-Language",
+            "example": "Unlimited plan for free bikes, as long as you don't break them!",
+            "type": "string"
+          },
+          "fare": {
+            "$ref": "#/components/schemas/fare"
+          },
+          "isTaxable": {
+            "description": "false indicates that no additional tax will be added (either because tax is not charged, or because it is included) true indicates that tax will be added to the base price",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "name of this pricing scheme, could match Content-Language",
+            "example": "Free Plan",
+            "type": "string"
+          },
+          "planId": {
+            "description": "a unique identifier for this plan in the system",
+            "example": "freeplan1",
+            "type": "string"
+          },
+          "regionId": {
+            "description": "pricing plan for a specific region",
+            "type": "string"
+          },
+          "stationId": {
+            "description": "pricing plan for a specific station",
+            "type": "string"
+          },
+          "surgePricing": {
+            "description": "Is there currently an increase in price in response to increased demand in this pricing plan? If this field is empty, it means there is no surge pricing in effect.",
+            "type": "boolean"
+          },
+          "url": {
+            "description": "a fully qualified URL where the customer can learn more about this particular scheme",
+            "example": "https://www.rentmyfreebike.com/freeplan",
+            "type": "string"
+          }
+        },
+        "required": [
+          "planId",
+          "name",
+          "isTaxable",
+          "description",
+          "fare"
+        ],
+        "type": "object"
+      },
+      "systemRegion": {
+        "properties": {
+          "name": {
+            "description": "Public name for this region, could match Content-Language",
+            "example": "BikeTown",
+            "type": "string"
+          },
+          "regionId": {
+            "description": "Unique identifier for this region",
+            "example": "BikeRegion",
+            "type": "string"
+          },
+          "serviceArea": {
+            "$ref": "#/components/schemas/geojsonPolygon"
+          },
+          "type": {
+            "default": "OPERATING",
+            "description": "the type of area. Default this is 'OPERATING', but other area's can be published here as well (since 1.3.0). Before 1.3.0, it was only allowed to communicate OPERATING area's.",
+            "enum": [
+              "OPERATING",
+              "NO_ACCESS",
+              "NO_PARKING",
+              "PARKING",
+              "DISCOUNT",
+              "SPEEDLIMIT"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "regionId",
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "ClientID": {
+        "in": "header",
+        "name": "DB-Client-ID",
+        "type": "apiKey",
+        "x-key-type": "client_id"
+      },
+      "ClientSecret": {
+        "in": "header",
+        "name": "DB-Api-Key",
+        "type": "apiKey",
+        "x-key-type": "client_secret"
+      }
+    }
+  },
+  "info": {
+    "contact": {
+      "email": "DBC.SharingAPI@deutschebahn.com",
+      "name": "Team MINT",
+      "url": "https://user-portal.hub.ose.db.de/#contact/contact"
+    },
+    "description": "## General  \n\nHi, i am the CallABike Bikesharing API implemented in [TOMP](https://github.com/TOMP-WG/TOMP-API).\n\n## Basic Usage  \n\nThe basic usage is described in each section of the requests. Please check the detailed usage there.\n\n##  Error Handling \n\nErrors are marked by the HTTP response codes. HTTP codes 40x, 500x mark those. \n\n### Requests take too long - HTTP Error 503 \n\nOn several requests, we support a retry pattern: if a request takes too long, we respond with HTTP 503, you can re-send your request once.\n\n### Error Responses  \n\nThe error responses follows the [TOMP Error Code Definitions](https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP#module-number-table) \n\nError Responses are grouped by errorCodes (numbered) and more detailed with error details (string)\n\n```                 \n  {\n  \"errorCode\": 4204,\n  \"title\": \"Illegal operation\",\n  \"detail\": \"bicycle.not-available\"\n  }\n```\n\nWe support the following types of error code ranges and specialized error keys within that:  \n\n### Possible Error Code Numbers and their meanings\n\n     3004 - Booking Error (Illegal Operation)\n     4004 - Trip Execution Errors (Illegal Operation)\n     4005 - Trip Execution Errors (Technical)\n     4202 - Trip Expiration Errors \n     4204 - Trip Functional Errors  \n     7005 - Internal Error\n     8001 - Missing Payload Error\n     8002 - Invalid Payload Error\n     8003 - Already exists/canceled Error\n     8004 - Illegal operation Error\n\n####  `3004` - Booking Error (Illegal Operation)\n\n     auth.unauthorized - this request was unauthorized  - http 400 \n\n####  `4004` - Trip Execution Errors (Illegal Operation) \n\n     bike.out-of-range - bike could not be opened, out of rage - http 400\n\n####  `4005` - Trip Execution Errors (Technical)\n\n     bike.open-error - bike could not be opened, technical reason - http 400\n\n####  `4202` - Trip Expiration Errors \n\n     leg.set-in-pause.duplicated      - there is already a pause leg - http 409\n     leg.set-in-use.expired           - the leg expired              - http 406\n     booking.expired                  - the booking expired          - http 400\n     leg.set-state-change.duplicated  - the leg state is duplicated  - http 409\n     leg.set-in-pause.expired         - the leg set in pause expired - http 406\n     user.not-found                   - the user was not found       - http 400\n     bicycle.not-available            - the bicycle is not available - http 400\n     customer.is-blocked              - the customer is blocked and not allowed to book a bicycle - http 400\n     customer.bike-limit-reached      - the customer has reached it's limit of rental bikes - http 400\n\n#### `4204` - Trip Functional Errors  \n\n     user.not-found        - the user was not found for creating this trip - http 400\n     bicycle.not-available - the bicycle is not available                  - http 400 \n     bicycle.not-found     - the bicycle was not found                     - http 400\n\n#### `7005` - Internal Error\n\n     error.unknown                    - unspecified internal error\n\n#### `8001` - Customer Missing Payload Error\n\n     customer.missing-payload-param - missing parameter for customer - http 400\n\n#### `8002` - Customer Invalid Payload Error\n\n     customer.field-does-not-match-required-pattern - customer parameter does not match - http 400\n\n#### `8003` - Customer Already exists/canceled Error\n\n     customer.already-exists - customer already exists - http 409\n     customer.already-canceled - customer already canceled - http 409\n\n#### `8004` - Customer Illegal operation Error\n\n     customer.value-does-not-exists - customer value not exists - http 400",
+    "license": {
+      "name": "DB Inner Source Lizenz Version 1.0",
+      "url": "https://git.tech.rz.db.de/foss/inner-source/blob/master/LICENSE-DBISL.txt"
+    },
+    "title": "CallaBike TOMP API Free",
+    "version": "1.5.321",
+    "x-ibm-name": "callabike-tomp-api-free"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/operator/available-assets": {
+      "get": {
+        "description": "Available assets (bicycles) are sorted by AssetType and StationId. When an available asset is returned, an attempt is made to assign it to a station. Stations have a defined radius within which available assets can be returned. If an available asset is within this radius, the available asset is assigned to the station, otherwise the available asset is available without station assignment. As mentioned at the beginning, it should be noted that the sorting of the available assets changes and therefore appears in a different position in the return.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/assetType"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Available assets or asset-types. In case assets are replied, the realtime location is also available.",
+            "headers": {
+              "Content-Language": {
+                "description": "The language/localization of user-facing content",
+                "example": "de",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          }
+        },
+        "summary": "gets available bikes",
+        "tags": [
+          "operator information"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/acceptLanguage"
+        },
+        {
+          "$ref": "#/components/parameters/api"
+        },
+        {
+          "$ref": "#/components/parameters/apiVersion"
+        },
+        {
+          "$ref": "#/components/parameters/maasId"
+        }
+      ]
+    },
+    "/operator/meta": {
+      "get": {
+        "description": "all versions that are implemented on this url, are described in the result of this endpoint. In contains all versions and per version the endpoints, their status and the supported scenarios.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/endpointImplementation"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "successful operation",
+            "headers": {
+              "Content-Language": {
+                "description": "The language/localization of user-facing content",
+                "example": "de",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "describes the running implementations",
+        "tags": [
+          "operator information"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/acceptLanguage"
+        },
+        {
+          "$ref": "#/components/parameters/maasId"
+        }
+      ]
+    },
+    "/operator/pricing-plans": {
+      "get": {
+        "description": "Describes pricing of systems or assets [from GBFS]",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/systemPricingPlan"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "returns standard pricing plans for an operator"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          }
+        },
+        "summary": "gives pricing information",
+        "tags": [
+          "operator information",
+          "registration"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/acceptLanguage"
+        },
+        {
+          "$ref": "#/components/parameters/api"
+        },
+        {
+          "$ref": "#/components/parameters/apiVersion"
+        },
+        {
+          "$ref": "#/components/parameters/maasId"
+        },
+        {
+          "$ref": "#/components/parameters/addressedTo"
+        }
+      ]
+    },
+    "/operator/regions": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/systemRegion"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          }
+        },
+        "summary": "describes regions for a system that is broken up by geographic or political region. It is defined as a separate feed to allow for additional region metadata (such as shape definitions). [from GBFS]",
+        "tags": [
+          "operator information"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/acceptLanguage"
+        },
+        {
+          "$ref": "#/components/parameters/api"
+        },
+        {
+          "$ref": "#/components/parameters/apiVersion"
+        },
+        {
+          "$ref": "#/components/parameters/maasId"
+        }
+      ]
+    },
+    "/operator/stations": {
+      "get": {
+        "description": "All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare's White House station) these should not be exposed here and their status should not be included [from GBFS]. This endpoint can be filtered using the regionId OR with the combination lon, lat and range.",
+        "parameters": [
+          {
+            "description": "the longitude of the search location (WGS84)",
+            "in": "query",
+            "name": "lon",
+            "schema": {
+              "format": "float",
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "description": "the latitude of the search location (WGS84)",
+            "in": "query",
+            "name": "lat",
+            "schema": {
+              "format": "float",
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "description": "the range in meters from the search location to look for stations",
+            "in": "query",
+            "name": "radius",
+            "schema": {
+              "format": "float",
+              "minimum": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/stationInformation"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "successful operation",
+            "headers": {
+              "Content-Language": {
+                "description": "The language/localization of user-facing content",
+                "example": "de",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          }
+        },
+        "summary": "describes all available stations",
+        "tags": [
+          "operator information"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/acceptLanguage"
+        },
+        {
+          "$ref": "#/components/parameters/api"
+        },
+        {
+          "$ref": "#/components/parameters/apiVersion"
+        },
+        {
+          "$ref": "#/components/parameters/maasId"
+        }
+      ]
+    }
+  },
+  "security": [
+    {
+      "ClientID": [],
+      "ClientSecret": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://apis.deutschebahn.com/db-api-marketplace/apis/tomp",
+      "description": "developer"
+    }
+  ],
+  "x-ibm-configuration": {
+    "application-authentication": {
+      "certificate": false
+    },
+    "cors": {
+      "enabled": true
+    },
+    "enforced": true,
+    "phase": "realized",
+    "testable": true,
+    "type": "rest"
+  },
+  "x-ibm-endpoints": [
+    {
+      "url": "https://apis.deutschebahn.com/db-api-marketplace/apis/tomp",
+      "description": "developer"
+    }
+  ]
+}

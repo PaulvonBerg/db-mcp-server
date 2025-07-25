@@ -1,0 +1,9 @@
+mcp
+httpx
+xmltodict
+pydantic
+python-dotenv
+fastapi
+uvicorn[standard]
+google-cloud-secret-manager
+Authlib

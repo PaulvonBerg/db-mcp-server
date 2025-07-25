@@ -1,0 +1,58 @@
+Creative Commons Attribution 4.0 International License
+
+Copyright (c) 2025 Paul von Berg and Deutsche Bahn MCP Server Contributors
+
+This work is licensed under a Creative Commons Attribution 4.0 International License.
+<http://creativecommons.org/licenses/by/4.0/>.
+
+ATTRIBUTION REQUEST:
+If you use this work, code, or concepts in your own projects, please provide proper attribution:
+"Based on Deutsche Bahn MCP Server by Paul von Berg"
+
+
+---
+
+ATTRIBUTION REQUIREMENTS:
+
+When using this software, you must provide appropriate credit to:
+1. Deutsche Bahn AG for providing the underlying APIs and data
+2. The original authors and contributors of this MCP server implementation
+
+DEUTSCHE BAHN API TERMS:
+
+This software uses APIs provided by Deutsche Bahn AG under their own terms and conditions.
+Users of this software must comply with Deutsche Bahn's API terms of service:
+- https://developers.deutschebahn.com/
+
+The Deutsche Bahn APIs used by this software have different licensing terms:
+
+CC BY 4.0 Licensed APIs:
+- Station data (StaDa API)
+- Timetable information 
+- Accessibility service information
+
+"Datenlizenz Deutschland – Namensnennung – Version 2.0" (dl-de/by-2-0) Licensed APIs:
+- Parking facility data (DB BahnPark API)
+
+PARKING INFORMATION DATA SPECIFIC TERMS:
+
+The Parking Information Data provided by DB BahnPark through this software is subject to additional restrictions under "Datenlizenz Deutschland – Namensnennung – Version 2.0":
+
+1. Content modification of parking data is NOT permitted
+2. Technical modifications (e.g., format changes) are permitted
+3. When using parking data, these licensing restrictions must be passed along with the license text
+
+Required attribution for parking data:
+"Parking Information Daten der DB BahnPark – API über den DB API Marketplace (https://developers.deutschebahn.com/db-api-marketplace/apis/product/parking-information-db-bahnpark)"
+
+DB Systel and DB BahnPark retain all rights to the parking information software, applications, interfaces, data and API keys.
+
+DATA ATTRIBUTION:
+
+When displaying or using data retrieved through this software, you must include appropriate attribution to Deutsche Bahn AG as the data source.
+
+DISCLAIMER:
+
+This software is not officially associated with or endorsed by Deutsche Bahn AG. It is an independent implementation that accesses publicly available Deutsche Bahn APIs.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
