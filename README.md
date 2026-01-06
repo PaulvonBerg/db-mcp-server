@@ -2,7 +2,7 @@
 
 A comprehensive Model Context Protocol (MCP) server that provides unified access to Deutsche Bahn (DB) and German mobility APIs. Built with Python, FastAPI, and FastMCP for seamless integration with Claude Desktop and other MCP clients.
 
-The server is ready for local and cloud deployment. A running MCP server is available to connect by adding the URL to your MCP Client: `https://db-mcp.datamonkey.tech/mcp`.
+The server is ready for local and cloud deployment. A running MCP server is available to connect by adding the URL to your MCP Client: `[SERVER DECOMISSIONED - HOST YOUR OWN DEPLOYMENT AS DESCRIBED]`.
 
 ## 🚀 Features
 
@@ -46,7 +46,7 @@ The server is ready for local and cloud deployment. A running MCP server is avai
 
 ## 🎯 Live Server Usage Guide
 
-The Deutsche Bahn MCP Server is live at `https://db-mcp.datamonkey.tech` and ready to use immediately. Follow these step-by-step guides to start accessing German railway data in Claude.
+[SERVER DECOMISSIONED - HOST YOUR OWN DEPLOYMENT AS DESCRIBED]
 
 ### 🖥️ Claude Desktop Setup
 
@@ -65,7 +65,7 @@ Open the file and add the Deutsche Bahn server:
       "command": "npx",
       "args": [
         "-y", "mcp-remote",
-        "https://db-mcp.datamonkey.tech/mcp",
+        "https://[SERVER DECOMISSIONED - Use your URL]/mcp",
         "--transport", "http-only"
       ]
     }
@@ -90,7 +90,7 @@ Go to [claude.ai](https://claude.ai) and begin a new conversation.
 Click on *"Search and Tools > Add connectors > Manage connectors"*
 Select *"Add custom connector"*
 Enter a name, e.g.: *"Deutsche Bahn MCP Server"* 
-Enter this remote MCP Server URL: `https://db-mcp.datamonkey.tech/mcp`
+Enter this remote MCP Server URL: [SERVER DECOMISSIONED - HOST YOUR OWN DEPLOYMENT AS DESCRIBED]
 
 **Step 3: Test immediately**
 Try asking: *"Find train stations near Frankfurt and check for any current delays at Frankfurt Hauptbahnhof."*
@@ -130,7 +130,7 @@ Once connected, try these practical examples:
 
 *Problem: Connection timeouts*
 - Verify internet connection
-- Try: `curl https://db-mcp.datamonkey.tech/mcp/ping` in terminal
+- Try: `curl https://[SERVER DECOMISSIONED - HOST YOUR OWN DEPLOYMENT AS DESCRIBED]/mcp/ping` in terminal
 - If curl fails, there may be network restrictions
 
 *Problem: "Command not found" errors*
@@ -149,10 +149,10 @@ Once connected, try these practical examples:
 *Server Status Check:*
 ```bash
 # Test if server is responding
-curl https://db-mcp.datamonkey.tech/health
+curl https://[SERVER DECOMISSIONED - HOST YOUR OWN DEPLOYMENT AS DESCRIBED]/health
 
 # Test MCP endpoint
-curl https://db-mcp.datamonkey.tech/mcp/ping
+curl https://[SERVER DECOMISSIONED - HOST YOUR OWN DEPLOYMENT AS DESCRIBED]/mcp/ping
 ```
 
 *Rate Limiting:*
@@ -534,7 +534,7 @@ Users must comply with Deutsche Bahn's API terms of service at [developers.deuts
 
 ## ⚠️ Service Disclaimer
 
-**For users of the live server at `https://db-mcp.datamonkey.tech`:**
+**For users of the live server at `[SERVER DECOMISSIONED - HOST YOUR OWN DEPLOYMENT AS DESCRIBED]:**
 
 This is a **community-provided service** hosted independently. Please note:
 
@@ -557,4 +557,4 @@ This is a **community-provided service** hosted independently. Please note:
 
 ---
 
-**Live Server**: https://db-mcp.datamonkey.tech  
+**Live Server**: [SERVER DECOMISSIONED - HOST YOUR OWN DEPLOYMENT AS DESCRIBED]
